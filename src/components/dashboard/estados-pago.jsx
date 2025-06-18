@@ -1,81 +1,104 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Edit, Trash2, MoreHorizontal, Play, Pause, CheckCircle, XCircle, Clock, Target } from "lucide-react"
+import {
+  Plus,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  CreditCard,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  DollarSign,
+} from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
 
-const EstadosCampanaPage = () => {
-  const [estadosCampana, setEstadosCampana] = useState([
+const EstadosPagoPage = () => {
+  const [estadosPago, setEstadosPago] = useState([
     {
       id: 1,
-      nombre: "Borrador",
-      descripcion: "Campaña en preparación, no publicada",
+      nombre: "Pendiente",
+      descripcion: "Pago pendiente de procesamiento",
       color: "#6b7280",
-      icono: "draft",
+      icono: "pending",
       orden: 1,
       esInicial: true,
       esFinal: false,
-      campanas: 12,
+      pagos: 45,
       fechaCreacion: "2024-01-15",
     },
     {
       id: 2,
-      nombre: "Programada",
-      descripcion: "Campaña programada para envío futuro",
+      nombre: "Procesando",
+      descripcion: "Pago siendo procesado por el gateway",
       color: "#f59e0b",
-      icono: "clock",
+      icono: "processing",
       orden: 2,
       esInicial: false,
       esFinal: false,
-      campanas: 8,
+      pagos: 23,
       fechaCreacion: "2024-01-15",
     },
     {
       id: 3,
-      nombre: "Activa",
-      descripcion: "Campaña en ejecución, enviando encuestas",
-      color: "#10b981",
-      icono: "play",
+      nombre: "Autorizado",
+      descripcion: "Pago autorizado por el banco",
+      color: "#3b82f6",
+      icono: "authorized",
       orden: 3,
       esInicial: false,
       esFinal: false,
-      campanas: 15,
+      pagos: 12,
       fechaCreacion: "2024-01-15",
     },
     {
       id: 4,
-      nombre: "Pausada",
-      descripcion: "Campaña temporalmente suspendida",
-      color: "#f97316",
-      icono: "pause",
+      nombre: "Completado",
+      descripcion: "Pago procesado exitosamente",
+      color: "#10b981",
+      icono: "completed",
       orden: 4,
       esInicial: false,
-      esFinal: false,
-      campanas: 3,
-      fechaCreacion: "2024-01-20",
+      esFinal: true,
+      pagos: 1234,
+      fechaCreacion: "2024-01-15",
     },
     {
       id: 5,
-      nombre: "Completada",
-      descripcion: "Campaña finalizada exitosamente",
-      color: "#059669",
-      icono: "check",
+      nombre: "Fallido",
+      descripcion: "Error en el procesamiento del pago",
+      color: "#ef4444",
+      icono: "failed",
       orden: 5,
       esInicial: false,
       esFinal: true,
-      campanas: 45,
-      fechaCreacion: "2024-01-25",
+      pagos: 34,
+      fechaCreacion: "2024-01-20",
     },
     {
       id: 6,
-      nombre: "Cancelada",
-      descripcion: "Campaña cancelada antes de completarse",
-      color: "#dc2626",
-      icono: "x",
+      nombre: "Reembolsado",
+      descripcion: "Pago reembolsado al cliente",
+      color: "#f97316",
+      icono: "refunded",
       orden: 6,
       esInicial: false,
       esFinal: true,
-      campanas: 7,
+      pagos: 18,
+      fechaCreacion: "2024-01-25",
+    },
+    {
+      id: 7,
+      nombre: "Cancelado",
+      descripcion: "Pago cancelado por el usuario",
+      color: "#dc2626",
+      icono: "cancelled",
+      orden: 7,
+      esInicial: false,
+      esFinal: true,
+      pagos: 8,
       fechaCreacion: "2024-02-01",
     },
   ])
@@ -85,20 +108,22 @@ const EstadosCampanaPage = () => {
 
   const getIconByType = (icono) => {
     switch (icono) {
-      case "draft":
-        return Target
-      case "clock":
+      case "pending":
         return Clock
-      case "play":
-        return Play
-      case "pause":
-        return Pause
-      case "check":
+      case "processing":
+        return CreditCard
+      case "authorized":
         return CheckCircle
-      case "x":
+      case "completed":
+        return DollarSign
+      case "failed":
+        return XCircle
+      case "refunded":
+        return AlertTriangle
+      case "cancelled":
         return XCircle
       default:
-        return Target
+        return CreditCard
     }
   }
 
@@ -108,22 +133,20 @@ const EstadosCampanaPage = () => {
   }
 
   const handleDelete = (id) => {
-    if (Window.confirm("¿Estás seguro de que quieres eliminar este estado?")) {
-      setEstadosCampana(estadosCampana.filter((estado) => estado.id !== id))
+    if (window.confirm("¿Estás seguro de que quieres eliminar este estado?")) {
+      setEstadosPago(estadosPago.filter((estado) => estado.id !== id))
     }
   }
 
   return (
-    <DashboardLayout activeSection="estados-campana">
+    <DashboardLayout activeSection="estados-pago">
       <div className="p-6">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Estados de Campaña</h1>
-              <p className="text-gray-600 mt-1 text-sm sm:text-base">
-                Gestiona los estados del ciclo de vida de las campañas
-              </p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Estados de Pago</h1>
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">Gestiona los estados del proceso de pagos</p>
             </div>
             <button
               onClick={() => setShowModal(true)}
@@ -140,23 +163,23 @@ const EstadosCampanaPage = () => {
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Target className="h-6 w-6 text-blue-600" />
+                <CreditCard className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Estados</p>
-                <p className="text-2xl font-bold text-gray-900">{estadosCampana.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{estadosPago.length}</p>
               </div>
             </div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Play className="h-6 w-6 text-green-600" />
+                <DollarSign className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Campañas Activas</p>
+                <p className="text-sm font-medium text-gray-600">Completados</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {estadosCampana.find((e) => e.nombre === "Activa")?.campanas || 0}
+                  {estadosPago.find((e) => e.nombre === "Completado")?.pagos || 0}
                 </p>
               </div>
             </div>
@@ -169,20 +192,24 @@ const EstadosCampanaPage = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">En Proceso</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {estadosCampana.filter((e) => !e.esFinal).reduce((sum, estado) => sum + estado.campanas, 0)}
+                  {estadosPago.filter((e) => !e.esFinal).reduce((sum, estado) => sum + estado.pagos, 0)}
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-purple-600" />
+              <div className="p-2 bg-red-100 rounded-lg">
+                <XCircle className="h-6 w-6 text-red-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completadas</p>
+                <p className="text-sm font-medium text-gray-600">Fallidos</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {estadosCampana.find((e) => e.nombre === "Completada")?.campanas || 0}
+                  {estadosPago
+                    .filter(
+                      (e) => e.nombre.toLowerCase().includes("fallido") || e.nombre.toLowerCase().includes("cancelado"),
+                    )
+                    .reduce((sum, estado) => sum + estado.pagos, 0)}
                 </p>
               </div>
             </div>
@@ -191,11 +218,16 @@ const EstadosCampanaPage = () => {
 
         {/* Workflow Visualization */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Flujo de Estados</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Flujo de Pagos</h3>
           <div className="overflow-x-auto">
             <div className="flex items-center gap-2 sm:gap-4 min-w-max pb-2">
-              {estadosCampana
-                .filter((e) => !e.nombre.toLowerCase().includes("cancelada"))
+              {estadosPago
+                .filter(
+                  (e) =>
+                    !e.nombre.toLowerCase().includes("fallido") &&
+                    !e.nombre.toLowerCase().includes("cancelado") &&
+                    !e.nombre.toLowerCase().includes("reembolsado"),
+                )
                 .sort((a, b) => a.orden - b.orden)
                 .map((estado, index, array) => {
                   const IconComponent = getIconByType(estado.icono)
@@ -211,7 +243,7 @@ const EstadosCampanaPage = () => {
                         <span className="text-xs sm:text-sm font-medium text-gray-900 mt-2 text-center max-w-[80px] truncate">
                           {estado.nombre}
                         </span>
-                        <span className="text-xs text-gray-500">{estado.campanas}</span>
+                        <span className="text-xs text-gray-500">{estado.pagos}</span>
                       </div>
                       {index < array.length - 1 && (
                         <div className="w-6 sm:w-8 h-0.5 bg-gray-300 mx-2 sm:mx-4 mt-[-20px]"></div>
@@ -240,7 +272,7 @@ const EstadosCampanaPage = () => {
                       Tipo
                     </th>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                      Campañas
+                      Pagos
                     </th>
                     <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
                       Orden
@@ -254,7 +286,7 @@ const EstadosCampanaPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {estadosCampana.map((estado) => {
+                  {estadosPago.map((estado) => {
                     const IconComponent = getIconByType(estado.icono)
                     return (
                       <tr key={estado.id} className="hover:bg-gray-50">
@@ -293,8 +325,8 @@ const EstadosCampanaPage = () => {
                         </td>
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <Target className="h-4 w-4 text-gray-400 mr-2" />
-                            <span className="text-sm text-gray-900">{estado.campanas}</span>
+                            <CreditCard className="h-4 w-4 text-gray-400 mr-2" />
+                            <span className="text-sm text-gray-900">{estado.pagos}</span>
                           </div>
                         </td>
                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{estado.orden}</td>
@@ -350,7 +382,7 @@ const EstadosCampanaPage = () => {
                   <input
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ej: En Revisión"
+                    placeholder="Ej: Procesando"
                     defaultValue={editingEstado?.nombre || ""}
                   />
                 </div>
@@ -378,12 +410,13 @@ const EstadosCampanaPage = () => {
                     defaultValue={editingEstado?.icono || ""}
                   >
                     <option value="">Seleccionar icono</option>
-                    <option value="draft">Borrador</option>
-                    <option value="clock">Programada</option>
-                    <option value="play">Activa</option>
-                    <option value="pause">Pausada</option>
-                    <option value="check">Completada</option>
-                    <option value="x">Cancelada</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="processing">Procesando</option>
+                    <option value="authorized">Autorizado</option>
+                    <option value="completed">Completado</option>
+                    <option value="failed">Fallido</option>
+                    <option value="refunded">Reembolsado</option>
+                    <option value="cancelled">Cancelado</option>
                   </select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -439,4 +472,4 @@ const EstadosCampanaPage = () => {
   )
 }
 
-export default EstadosCampanaPage
+export default EstadosPagoPage

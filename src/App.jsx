@@ -4,10 +4,16 @@ import './App.css';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import DashboardLayout from './components/dashboard-layout';
 import Roles from './components/dashboard/roles';
 import Canales from './components/dashboard/canales';
 import EstadoDocumento from './components/dashboard/estado-documento';
+import EstadoEntrega from './components/dashboard/estados-entrega';
+import EstadosPago from './components/dashboard/estados-pago';
+import TiposPregunta from './components/dashboard/tipos-pregunta';
+import MetodoPago from './components/dashboard/metodos-pago';
+import EstadosCampaña from './components/dashboard/estados-campana';
+
+
 
 function App() {
   return (
@@ -21,7 +27,13 @@ function App() {
           <Route path="/dashboard/roles" element={<Roles />} />
           <Route path="/dashboard/canales" element={<Canales />} />
           <Route path="/dashboard/estado-documento" element={<EstadoDocumento />} />
-        
+          <Route path="/dashboard/estados-entrega" element={<EstadoEntrega />} />
+          <Route path="/dashboard/estados-pago" element={<EstadosPago />} />
+          <Route path="/dashboard/tipos-pregunta" element={<TiposPregunta />} />
+          <Route path="/dashboard/metodos-pago" element={<MetodoPago />} />
+          <Route path="/dashboard/estados-campana" element={<EstadosCampaña />} />
+
+
         {/* Ruta de fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

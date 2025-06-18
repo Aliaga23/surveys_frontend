@@ -1,7 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { BarChart3, Users, Radio, FileText, Settings, LogOut, Bell, Search } from "lucide-react"
+import {
+  BarChart3,
+  Users,
+  Radio,
+  FileText,
+  Settings,
+  LogOut,
+  Bell,
+  Search,
+  MessageSquare,
+  Target,
+  Truck,
+  CreditCard,
+  DollarSign,
+} from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -36,19 +50,59 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
       ],
     },
     {
-      title: "Configuración",
+      title: "Configuración de Encuestas",
       items: [
+        {
+          title: "Tipos de Pregunta",
+          url: "/dashboard/tipos-pregunta",
+          icon: MessageSquare,
+          isActive: activeSection === "tipos-pregunta",
+        },
         {
           title: "Canales",
           url: "/dashboard/canales",
           icon: Radio,
           isActive: activeSection === "canales",
         },
+      ],
+    },
+    {
+      title: "Estados del Sistema",
+      items: [
         {
-          title: "Estado Documento",
+          title: "Estados Campaña",
+          url: "/dashboard/estados-campana",
+          icon: Target,
+          isActive: activeSection === "estados-campana",
+        },
+        {
+          title: "Estados Entrega",
+          url: "/dashboard/estados-entrega",
+          icon: Truck,
+          isActive: activeSection === "estados-entrega",
+        },
+        {
+          title: "Estados Documento",
           url: "/dashboard/estado-documento",
           icon: FileText,
           isActive: activeSection === "estado-documento",
+        },
+        {
+          title: "Estados Pago",
+          url: "/dashboard/estados-pago",
+          icon: CreditCard,
+          isActive: activeSection === "estados-pago",
+        },
+      ],
+    },
+    {
+      title: "Pagos",
+      items: [
+        {
+          title: "Métodos de Pago",
+          url: "/dashboard/metodos-pago",
+          icon: DollarSign,
+          isActive: activeSection === "metodos-pago",
         },
       ],
     },
