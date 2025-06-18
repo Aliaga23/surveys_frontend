@@ -15,6 +15,7 @@ import {
   Truck,
   CreditCard,
   DollarSign,
+  Crown,
 } from "lucide-react"
 import {
   Sidebar,
@@ -96,8 +97,14 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
       ],
     },
     {
-      title: "Pagos",
+      title: "Suscripciones y Pagos",
       items: [
+        {
+          title: "Planes",
+          url: "/dashboard/planes",
+          icon: Crown,
+          isActive: activeSection === "planes",
+        },
         {
           title: "Métodos de Pago",
           url: "/dashboard/metodos-pago",

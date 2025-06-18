@@ -12,7 +12,7 @@ import EstadosPago from './components/dashboard/estados-pago';
 import TiposPregunta from './components/dashboard/tipos-pregunta';
 import MetodoPago from './components/dashboard/metodos-pago';
 import EstadosCampaña from './components/dashboard/estados-campana';
-
+import Planes from './components/dashboard/planes';
 
 
 function App() {
@@ -32,7 +32,7 @@ function App() {
           <Route path="/dashboard/tipos-pregunta" element={<TiposPregunta />} />
           <Route path="/dashboard/metodos-pago" element={<MetodoPago />} />
           <Route path="/dashboard/estados-campana" element={<EstadosCampaña />} />
-
+          <Route path="/dashboard/planes" element={<Planes />} />
 
         {/* Ruta de fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
