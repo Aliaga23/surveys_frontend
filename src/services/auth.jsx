@@ -45,8 +45,8 @@ export async function login(credentials) {
     const userInfo = await getCurrentUser()
 
     if (userInfo.tipo === "admin") {
-      window.location.href = "/dashboard"
-    } else if (userInfo.tipo === "suscriptor") {
+      window.location.href = "/dashboard/roles"
+    } else if (userInfo.tipo === "empresa" || userInfo.tipo === "operator") {
       window.location.href = "/dashboard-suscriptor"
     }
 
@@ -112,7 +112,7 @@ export function getAuthToken() {
 
 export function redirectBasedOnRole(userRole) {
   if (userRole === "admin") {
-    return "/dashboard"
+    return "/dashboard/roles"
   } else if (userRole === "empresa" || userRole === "suscriptor") {
     return "/dashboard-suscriptor"
   } else if (userRole === "operator") {
