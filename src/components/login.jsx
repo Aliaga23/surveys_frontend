@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, BarChart3, Menu, X } from "lucide-react"
+import { login } from "../services/auth"
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -46,6 +47,8 @@ const Login = () => {
     return newErrors
   }
 
+  // Actualizar el handleSubmit para usar la nueva función de login con redirección automática
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     const newErrors = validateForm()
@@ -57,14 +60,16 @@ const Login = () => {
 
     setIsLoading(true)
 
-    // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      console.log("Login attempt:", formData)
+      //await new Promise((resolve) => setTimeout(resolve, 2000))
+      //console.log("Login attempt:", formData)
       // Handle successful login here
-      alert("¡Inicio de sesión exitoso!")
+      //alert("¡Inicio de sesión exitoso!")
+      await login(formData)
+      // La redirección se maneja automáticamente en el servicio de auth
     } catch (error) {
       console.error("Login error:", error)
+      setErrors({ general: error.message || "Error en el inicio de sesión" })
     } finally {
       setIsLoading(false)
     }
@@ -258,6 +263,11 @@ const Login = () => {
                 </button>
               </div>
             </form>
+            {errors.general && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{errors.general}</p>
+              </div>
+            )}
 
             {/* Divider */}
             <div className="mt-6">
