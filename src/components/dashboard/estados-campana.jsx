@@ -1,433 +1,185 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Edit, Trash2, MoreHorizontal, Play, Pause, CheckCircle, XCircle, Clock, Target } from "lucide-react"
+import { useEffect, useState } from "react"
+import {
+  Plus,
+  Play, Pause, CheckCircle, XCircle, Clock, Target
+} from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
+import {
+  listarEstadosCampana,
+  crearEstadoCampana,
+  actualizarEstadoCampana,
+  eliminarEstadoCampana
+} from "../../services/api-admin"
+
+const estadoIconos = {
+  borrador: { icono: Target, color: "#6b7280" },
+  programada: { icono: Clock, color: "#f59e0b" },
+  enviada: { icono: Play, color: "#10b981" },
+  pausada: { icono: Pause, color: "#f97316" },
+  completada: { icono: CheckCircle, color: "#059669" },
+  cerrada: { icono: XCircle, color: "#dc2626" },
+}
+
+const getIconData = (nombre) => {
+  const key = nombre?.toLowerCase()
+  return estadoIconos[key] || { icono: Target, color: "#3b82f6" }
+}
 
 const EstadosCampanaPage = () => {
-  const [estadosCampana, setEstadosCampana] = useState([
-    {
-      id: 1,
-      nombre: "Borrador",
-      descripcion: "Campaña en preparación, no publicada",
-      color: "#6b7280",
-      icono: "draft",
-      orden: 1,
-      esInicial: true,
-      esFinal: false,
-      campanas: 12,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 2,
-      nombre: "Programada",
-      descripcion: "Campaña programada para envío futuro",
-      color: "#f59e0b",
-      icono: "clock",
-      orden: 2,
-      esInicial: false,
-      esFinal: false,
-      campanas: 8,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 3,
-      nombre: "Activa",
-      descripcion: "Campaña en ejecución, enviando encuestas",
-      color: "#10b981",
-      icono: "play",
-      orden: 3,
-      esInicial: false,
-      esFinal: false,
-      campanas: 15,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 4,
-      nombre: "Pausada",
-      descripcion: "Campaña temporalmente suspendida",
-      color: "#f97316",
-      icono: "pause",
-      orden: 4,
-      esInicial: false,
-      esFinal: false,
-      campanas: 3,
-      fechaCreacion: "2024-01-20",
-    },
-    {
-      id: 5,
-      nombre: "Completada",
-      descripcion: "Campaña finalizada exitosamente",
-      color: "#059669",
-      icono: "check",
-      orden: 5,
-      esInicial: false,
-      esFinal: true,
-      campanas: 45,
-      fechaCreacion: "2024-01-25",
-    },
-    {
-      id: 6,
-      nombre: "Cancelada",
-      descripcion: "Campaña cancelada antes de completarse",
-      color: "#dc2626",
-      icono: "x",
-      orden: 6,
-      esInicial: false,
-      esFinal: true,
-      campanas: 7,
-      fechaCreacion: "2024-02-01",
-    },
-  ])
-
+  const [estados, setEstados] = useState([])
   const [showModal, setShowModal] = useState(false)
-  const [editingEstado, setEditingEstado] = useState(null)
+  const [nombre, setNombre] = useState("")
+  const [editingId, setEditingId] = useState(null)
 
-  const getIconByType = (icono) => {
-    switch (icono) {
-      case "draft":
-        return Target
-      case "clock":
-        return Clock
-      case "play":
-        return Play
-      case "pause":
-        return Pause
-      case "check":
-        return CheckCircle
-      case "x":
-        return XCircle
-      default:
-        return Target
+  const fetchEstados = async () => {
+    try {
+      const data = await listarEstadosCampana()
+      setEstados(data)
+    } catch (error) {
+      console.error("Error al obtener estados:", error)
+    }
+  }
+
+  useEffect(() => {
+    fetchEstados()
+  }, [])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      if (editingId) {
+        await actualizarEstadoCampana(editingId, nombre)
+      } else {
+        await crearEstadoCampana(nombre)
+      }
+      setNombre("")
+      setEditingId(null)
+      setShowModal(false)
+      fetchEstados()
+    } catch (error) {
+      console.error("Error al guardar estado:", error)
+      alert("Hubo un error al guardar. Revisa la consola.")
     }
   }
 
   const handleEdit = (estado) => {
-    setEditingEstado(estado)
+    setNombre(estado.nombre)
+    setEditingId(estado.id)
     setShowModal(true)
   }
 
-  const handleDelete = (id) => {
-    if (Window.confirm("¿Estás seguro de que quieres eliminar este estado?")) {
-      setEstadosCampana(estadosCampana.filter((estado) => estado.id !== id))
+  const handleDelete = async (id) => {
+    if (window.confirm("¿Estás seguro de que quieres eliminar este estado?")) {
+      try {
+        await eliminarEstadoCampana(id)
+        fetchEstados()
+      } catch (error) {
+        console.error("Error al eliminar estado:", error)
+      }
     }
   }
 
   return (
     <DashboardLayout activeSection="estados-campana">
       <div className="p-6">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Estados de Campaña</h1>
-              <p className="text-gray-600 mt-1 text-sm sm:text-base">
-                Gestiona los estados del ciclo de vida de las campañas
-              </p>
-            </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Nuevo Estado</span>
-            </button>
-          </div>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Estados de Campaña</h1>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="inline w-4 h-4 mr-2" /> Nuevo Estado
+          </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Target className="h-6 w-6 text-blue-600" />
+        {/* Visualización flujo */}
+        <div className="flex gap-6 mb-8">
+          {estados.map((estado) => {
+            const { icono: Icon, color } = getIconData(estado.nombre)
+            return (
+              <div key={estado.id} className="flex flex-col items-center">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+                  style={{ backgroundColor: color }}
+                >
+                  <Icon className="w-5 h-5" />
+                </div>
+                <span className="mt-1 text-sm font-medium">{estado.nombre}</span>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Estados</p>
-                <p className="text-2xl font-bold text-gray-900">{estadosCampana.length}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Play className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Campañas Activas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {estadosCampana.find((e) => e.nombre === "Activa")?.campanas || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">En Proceso</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {estadosCampana.filter((e) => !e.esFinal).reduce((sum, estado) => sum + estado.campanas, 0)}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completadas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {estadosCampana.find((e) => e.nombre === "Completada")?.campanas || 0}
-                </p>
-              </div>
-            </div>
-          </div>
+            )
+          })}
         </div>
 
-        {/* Workflow Visualization */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Flujo de Estados</h3>
-          <div className="overflow-x-auto">
-            <div className="flex items-center gap-2 sm:gap-4 min-w-max pb-2">
-              {estadosCampana
-                .filter((e) => !e.nombre.toLowerCase().includes("cancelada"))
-                .sort((a, b) => a.orden - b.orden)
-                .map((estado, index, array) => {
-                  const IconComponent = getIconByType(estado.icono)
-                  return (
-                    <div key={estado.id} className="flex items-center">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white"
-                          style={{ backgroundColor: estado.color }}
-                        >
-                          <IconComponent className="h-4 w-4 sm:h-6 sm:w-6" />
-                        </div>
-                        <span className="text-xs sm:text-sm font-medium text-gray-900 mt-2 text-center max-w-[80px] truncate">
-                          {estado.nombre}
-                        </span>
-                        <span className="text-xs text-gray-500">{estado.campanas}</span>
-                      </div>
-                      {index < array.length - 1 && (
-                        <div className="w-6 sm:w-8 h-0.5 bg-gray-300 mx-2 sm:mx-4 mt-[-20px]"></div>
-                      )}
+        {/* Tabla */}
+        <table className="w-full bg-white shadow-sm rounded-xl overflow-hidden">
+          <thead className="bg-gray-50 text-left">
+            <tr>
+              <th className="p-4">Nombre</th>
+              <th className="p-4 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {estados.map((estado) => {
+              const { icono: Icon, color } = getIconData(estado.nombre)
+              return (
+                <tr key={estado.id} className="border-t">
+                  <td className="p-4 flex items-center gap-3">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                      style={{ backgroundColor: color }}
+                    >
+                      <Icon className="w-4 h-4" />
                     </div>
-                  )
-                })}
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Lista de Estados</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <div className="min-w-full inline-block align-middle">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[250px]">
-                      Estado
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                      Tipo
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                      Campañas
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
-                      Orden
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                      Fecha Creación
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {estadosCampana.map((estado) => {
-                    const IconComponent = getIconByType(estado.icono)
-                    return (
-                      <tr key={estado.id} className="hover:bg-gray-50">
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div
-                              className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white mr-3 flex-shrink-0"
-                              style={{ backgroundColor: estado.color }}
-                            >
-                              <IconComponent className="h-3 w-3 sm:h-4 sm:w-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium text-gray-900">{estado.nombre}</div>
-                              <div className="text-sm text-gray-500 hidden sm:block truncate">{estado.descripcion}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-wrap gap-1">
-                            {estado.esInicial && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Inicial
-                              </span>
-                            )}
-                            {estado.esFinal && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Final
-                              </span>
-                            )}
-                            {!estado.esInicial && !estado.esFinal && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                Intermedio
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <Target className="h-4 w-4 text-gray-400 mr-2" />
-                            <span className="text-sm text-gray-900">{estado.campanas}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{estado.orden}</td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <span className="hidden sm:inline">
-                            {new Date(estado.fechaCreacion).toLocaleDateString()}
-                          </span>
-                          <span className="sm:hidden">
-                            {new Date(estado.fechaCreacion).toLocaleDateString("es-ES", {
-                              day: "2-digit",
-                              month: "2-digit",
-                            })}
-                          </span>
-                        </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex items-center justify-end space-x-1">
-                            <button
-                              onClick={() => handleEdit(estado)}
-                              className="text-blue-600 hover:text-blue-900 p-1"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(estado.id)}
-                              className="text-red-600 hover:text-red-900 p-1"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                            <button className="text-gray-400 hover:text-gray-600 p-1">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+                    <span className="text-gray-900 font-medium">{estado.nombre}</span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <button onClick={() => handleEdit(estado)} className="text-blue-600 hover:underline mr-3">
+                      Editar
+                    </button>
+                    <button onClick={() => handleDelete(estado.id)} className="text-red-600 hover:underline">
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {editingEstado ? "Editar Estado" : "Nuevo Estado"}
-              </h3>
-              <form className="space-y-4">
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">
+                {editingId ? "Editar Estado" : "Nuevo Estado"}
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Estado</label>
+                  <label className="block mb-1 text-sm font-medium">Nombre</label>
                   <input
                     type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ej: En Revisión"
-                    defaultValue={editingEstado?.nombre || ""}
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                  <textarea
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Describe qué significa este estado"
-                    defaultValue={editingEstado?.descripcion || ""}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                  <input
-                    type="color"
-                    className="w-full h-10 border border-gray-300 rounded-lg"
-                    defaultValue={editingEstado?.color || "#3b82f6"}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Icono</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    defaultValue={editingEstado?.icono || ""}
-                  >
-                    <option value="">Seleccionar icono</option>
-                    <option value="draft">Borrador</option>
-                    <option value="clock">Programada</option>
-                    <option value="play">Activa</option>
-                    <option value="pause">Pausada</option>
-                    <option value="check">Completada</option>
-                    <option value="x">Cancelada</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Orden</label>
-                    <input
-                      type="number"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="1"
-                      defaultValue={editingEstado?.orden || ""}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        defaultChecked={editingEstado?.esInicial || false}
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Estado inicial</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        defaultChecked={editingEstado?.esFinal || false}
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Estado final</span>
-                    </label>
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-3 pt-4">
+                <div className="flex justify-end gap-3">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false)
-                      setEditingEstado(null)
+                      setEditingId(null)
+                      setNombre("")
                     }}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50"
                   >
                     Cancelar
                   </button>
                   <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    {editingEstado ? "Actualizar" : "Crear"}
+                    {editingId ? "Actualizar" : "Crear"}
                   </button>
                 </div>
               </form>

@@ -5,7 +5,8 @@
 import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, MoreHorizontal } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
-import { crearRol, listarRoles, actualizarRol, eliminarRol } from "../../services/rolesA"
+import { listarRoles, crearRol, actualizarRol, eliminarRol } from "../../services/api-admin"
+
 
 const RolesPage = () => {
   const [roles, setRoles] = useState([])

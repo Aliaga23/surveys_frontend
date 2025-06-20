@@ -1,0 +1,49 @@
+// src/services/api-admin.js
+
+const API_BASE_URL = "https://surveysbackend-production.up.railway.app"
+
+const authFetch = async (endpoint, options = {}) => {
+  const token = localStorage.getItem("token")
+  if (!token) throw new Error("No hay token de autenticación")
+
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+    ...options,
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("token")
+      window.location.href = "/login"
+      throw new Error("Sesión expirada")
+    }
+    const errorData = await response.text()
+    throw new Error(`Error ${response.status}: ${errorData}`)
+  }
+
+  if (response.status === 204) return true
+  return response.json()
+}
+
+// Roles
+export const listarRoles = () => authFetch("/catalogos/roles")
+export const obtenerRol = (id) => authFetch(`/catalogos/roles/${id}`)
+export const crearRol = (nombre) =>
+  authFetch("/catalogos/roles", { method: "POST", body: JSON.stringify({ nombre }) })
+export const actualizarRol = (id, nombre) =>
+  authFetch(`/catalogos/roles/${id}`, { method: "PUT", body: JSON.stringify({ nombre }) })
+export const eliminarRol = (id) => authFetch(`/catalogos/roles/${id}`, { method: "DELETE" })
+
+// Estados Capaña
+export const listarEstadosCampana = () => authFetch("/catalogos/estados-campana")
+export const crearEstadoCampana = (nombre) =>
+  authFetch("/catalogos/estados-campana", { method: "POST", body: JSON.stringify({ nombre }) })
+export const actualizarEstadoCampana = (id, nombre) =>
+  authFetch(`/catalogos/estados-campana/${id}`, { method: "PUT", body: JSON.stringify({ nombre }) })
+export const eliminarEstadoCampana = (id) => authFetch(`/catalogos/estados-campana/${id}`, { method: "DELETE" })
