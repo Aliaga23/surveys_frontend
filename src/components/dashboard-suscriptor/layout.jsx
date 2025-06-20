@@ -81,6 +81,12 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
           icon: MessageSquare,
           isActive: activeSection === "respuestas",
         },
+        {
+          title: "Entregas",
+          url: "/dashboard-suscriptor/entregas",
+          icon: MessageSquare,
+          isActive: activeSection === "entregas",
+        }
       ],
     },
     {

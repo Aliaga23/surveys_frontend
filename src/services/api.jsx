@@ -85,18 +85,37 @@ export const getCampanas = () => authFetch("/campanas")
 export const getCampana = (id) => authFetch(`/campanas/${id}`)
 export const getCampanaFullDetail = (id) => authFetch(`/campanas/${id}/full-detail`)
 export const createCampana = (data) => {
+  // Limpiar campos vacíos antes de enviar
   const cleanData = Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== "" && value !== null))
   return authFetch("/campanas", { method: "POST", body: JSON.stringify(cleanData) })
 }
 export const updateCampana = (id, data) => {
+  // Limpiar campos vacíos antes de enviar
   const cleanData = Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== "" && value !== null))
   return authFetch(`/campanas/${id}`, { method: "PATCH", body: JSON.stringify(cleanData) })
 }
 export const deleteCampana = (id) => authFetch(`/campanas/${id}`, { method: "DELETE" })
 
 // Entregas
-export const getEntregas = (campanId) => authFetch(`/entregas?campana_id=${campanId}`)
-export const createEntrega = (data) => authFetch("/entregas", { method: "POST", body: JSON.stringify(data) })
+export const getEntregasByCampana = (campanaId, skip = 0, limit = 100) =>
+  authFetch(`/campanas/${campanaId}/entregas?skip=${skip}&limit=${limit}`)
+
+export const createEntrega = (campanaId, data) =>
+  authFetch(`/campanas/${campanaId}/entregas`, { method: "POST", body: JSON.stringify(data) })
+
+export const getEntrega = (campanaId, entregaId) => authFetch(`/campanas/${campanaId}/entregas/${entregaId}`)
+
+export const updateEntrega = (campanaId, entregaId, data) =>
+  authFetch(`/campanas/${campanaId}/entregas/${entregaId}`, { method: "PATCH", body: JSON.stringify(data) })
+
+export const deleteEntrega = (campanaId, entregaId) =>
+  authFetch(`/campanas/${campanaId}/entregas/${entregaId}`, { method: "DELETE" })
+
+export const markEntregaAsSent = (campanaId, entregaId) =>
+  authFetch(`/campanas/${campanaId}/entregas/${entregaId}/mark-sent`, { method: "POST" })
+
+export const markEntregaAsResponded = (campanaId, entregaId) =>
+  authFetch(`/campanas/${campanaId}/entregas/${entregaId}/mark-responded`, { method: "POST" })
 
 // Respuestas
 export const getRespuestas = (campanId = null) => {
