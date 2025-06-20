@@ -15,6 +15,8 @@ import EstadosCampaña from './components/dashboard/estados-campana';
 import Planes from './components/dashboard/planes';
 import PlantillasPage from './components/dashboard-suscriptor/plantillas';
 import CampanasPage from './components/dashboard-suscriptor/campanas';
+import DestinatariosPage from './components/dashboard-suscriptor/destinatarios';
+
 function App() {
   return (
     <Router>
@@ -35,6 +37,7 @@ function App() {
           <Route path="/dashboard/planes" element={<Planes />} />
           <Route path="/dashboard-suscriptor/plantillas" element={<PlantillasPage />} />
           <Route path="/dashboard-suscriptor/campanas" element={<CampanasPage />} />
+          <Route path="/dashboard-suscriptor/destinatarios" element={<DestinatariosPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
