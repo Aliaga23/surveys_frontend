@@ -18,7 +18,7 @@ import CampanasPage from './components/dashboard-suscriptor/campanas';
 import DestinatariosPage from './components/dashboard-suscriptor/destinatarios';
 import EncuestaPage from './pages/EncuestaPage';
 import EntregasPage from './components/dashboard-suscriptor/entregas';
-
+import RespuestasPage from './components/dashboard-suscriptor/respuestas';
 function App() {
   return (
     <Router>
@@ -41,6 +41,7 @@ function App() {
           <Route path="/dashboard-suscriptor/campanas" element={<CampanasPage />} />
           <Route path="/dashboard-suscriptor/destinatarios" element={<DestinatariosPage />} />
           <Route path="/dashboard-suscriptor/entregas" element={<EntregasPage />} />
+          <Route path="/dashboard-suscriptor/respuestas" element={<RespuestasPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
