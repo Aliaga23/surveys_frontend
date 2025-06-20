@@ -1,152 +1,112 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Plus,
   Edit,
   Trash2,
-  MoreHorizontal,
-  CreditCard,
   Clock,
   CheckCircle,
-  XCircle,
   AlertTriangle,
+  XCircle,
+  CreditCard,
   DollarSign,
 } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
+import {
+  listarEstadosPago,
+  crearEstadoPago,
+  actualizarEstadoPago,
+  eliminarEstadoPago
+} from "../../services/api-admin"
+
+const getIconByName = (nombre) => {
+  const iconos = {
+    pendiente: Clock,
+    exitoso: CheckCircle,
+    fallido: XCircle,
+    reembolsado: AlertTriangle,
+    cancelado: XCircle,
+    pago: DollarSign
+  }
+  return iconos[nombre?.toLowerCase()] || CreditCard
+}
+
+const getColorByName = (nombre) => {
+  const colores = {
+    pendiente: "#6b7280",
+    exitoso: "#10b981",
+    fallido: "#ef4444",
+    reembolsado: "#f97316",
+    cancelado: "#dc2626",
+    pago: "#22c55e"
+  }
+  return colores[nombre?.toLowerCase()] || "#3b82f6"
+}
 
 const EstadosPagoPage = () => {
-  const [estadosPago, setEstadosPago] = useState([
-    {
-      id: 1,
-      nombre: "Pendiente",
-      descripcion: "Pago pendiente de procesamiento",
-      color: "#6b7280",
-      icono: "pending",
-      orden: 1,
-      esInicial: true,
-      esFinal: false,
-      pagos: 45,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 2,
-      nombre: "Procesando",
-      descripcion: "Pago siendo procesado por el gateway",
-      color: "#f59e0b",
-      icono: "processing",
-      orden: 2,
-      esInicial: false,
-      esFinal: false,
-      pagos: 23,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 3,
-      nombre: "Autorizado",
-      descripcion: "Pago autorizado por el banco",
-      color: "#3b82f6",
-      icono: "authorized",
-      orden: 3,
-      esInicial: false,
-      esFinal: false,
-      pagos: 12,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 4,
-      nombre: "Completado",
-      descripcion: "Pago procesado exitosamente",
-      color: "#10b981",
-      icono: "completed",
-      orden: 4,
-      esInicial: false,
-      esFinal: true,
-      pagos: 1234,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 5,
-      nombre: "Fallido",
-      descripcion: "Error en el procesamiento del pago",
-      color: "#ef4444",
-      icono: "failed",
-      orden: 5,
-      esInicial: false,
-      esFinal: true,
-      pagos: 34,
-      fechaCreacion: "2024-01-20",
-    },
-    {
-      id: 6,
-      nombre: "Reembolsado",
-      descripcion: "Pago reembolsado al cliente",
-      color: "#f97316",
-      icono: "refunded",
-      orden: 6,
-      esInicial: false,
-      esFinal: true,
-      pagos: 18,
-      fechaCreacion: "2024-01-25",
-    },
-    {
-      id: 7,
-      nombre: "Cancelado",
-      descripcion: "Pago cancelado por el usuario",
-      color: "#dc2626",
-      icono: "cancelled",
-      orden: 7,
-      esInicial: false,
-      esFinal: true,
-      pagos: 8,
-      fechaCreacion: "2024-02-01",
-    },
-  ])
-
+  const [estados, setEstados] = useState([])
   const [showModal, setShowModal] = useState(false)
-  const [editingEstado, setEditingEstado] = useState(null)
+  const [nombre, setNombre] = useState("")
+  const [editingId, setEditingId] = useState(null)
 
-  const getIconByType = (icono) => {
-    switch (icono) {
-      case "pending":
-        return Clock
-      case "processing":
-        return CreditCard
-      case "authorized":
-        return CheckCircle
-      case "completed":
-        return DollarSign
-      case "failed":
-        return XCircle
-      case "refunded":
-        return AlertTriangle
-      case "cancelled":
-        return XCircle
-      default:
-        return CreditCard
+  const fetchEstados = async () => {
+    try {
+      const data = await listarEstadosPago()
+      setEstados(data)
+    } catch (error) {
+      console.error("Error al obtener estados de pago:", error)
+    }
+  }
+
+  useEffect(() => {
+    fetchEstados()
+  }, [])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      if (editingId) {
+        await actualizarEstadoPago(editingId, nombre)
+      } else {
+        await crearEstadoPago(nombre)
+      }
+      setNombre("")
+      setEditingId(null)
+      setShowModal(false)
+      fetchEstados()
+    } catch (error) {
+      console.error("Error al guardar estado:", error)
     }
   }
 
   const handleEdit = (estado) => {
-    setEditingEstado(estado)
+    setNombre(estado.nombre)
+    setEditingId(estado.id)
     setShowModal(true)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar este estado?")) {
-      setEstadosPago(estadosPago.filter((estado) => estado.id !== id))
+      try {
+        await eliminarEstadoPago(id)
+        fetchEstados()
+      } catch (error) {
+        console.error("Error al eliminar estado:", error)
+      }
     }
   }
 
   return (
     <DashboardLayout activeSection="estados-pago">
       <div className="p-6">
-        {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Estados de Pago</h1>
-              <p className="text-gray-600 mt-1 text-sm sm:text-base">Gestiona los estados del proceso de pagos</p>
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">
+                Administra los estados posibles del proceso de pago en el sistema
+              </p>
             </div>
             <button
               onClick={() => setShowModal(true)}
@@ -158,104 +118,6 @@ const EstadosPagoPage = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <CreditCard className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Estados</p>
-                <p className="text-2xl font-bold text-gray-900">{estadosPago.length}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completados</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {estadosPago.find((e) => e.nombre === "Completado")?.pagos || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">En Proceso</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {estadosPago.filter((e) => !e.esFinal).reduce((sum, estado) => sum + estado.pagos, 0)}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <XCircle className="h-6 w-6 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Fallidos</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {estadosPago
-                    .filter(
-                      (e) => e.nombre.toLowerCase().includes("fallido") || e.nombre.toLowerCase().includes("cancelado"),
-                    )
-                    .reduce((sum, estado) => sum + estado.pagos, 0)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Workflow Visualization */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Flujo de Pagos</h3>
-          <div className="overflow-x-auto">
-            <div className="flex items-center gap-2 sm:gap-4 min-w-max pb-2">
-              {estadosPago
-                .filter(
-                  (e) =>
-                    !e.nombre.toLowerCase().includes("fallido") &&
-                    !e.nombre.toLowerCase().includes("cancelado") &&
-                    !e.nombre.toLowerCase().includes("reembolsado"),
-                )
-                .sort((a, b) => a.orden - b.orden)
-                .map((estado, index, array) => {
-                  const IconComponent = getIconByType(estado.icono)
-                  return (
-                    <div key={estado.id} className="flex items-center">
-                      <div className="flex flex-col items-center">
-                        <div
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white"
-                          style={{ backgroundColor: estado.color }}
-                        >
-                          <IconComponent className="h-4 w-4 sm:h-6 sm:w-6" />
-                        </div>
-                        <span className="text-xs sm:text-sm font-medium text-gray-900 mt-2 text-center max-w-[80px] truncate">
-                          {estado.nombre}
-                        </span>
-                        <span className="text-xs text-gray-500">{estado.pagos}</span>
-                      </div>
-                      {index < array.length - 1 && (
-                        <div className="w-6 sm:w-8 h-0.5 bg-gray-300 mx-2 sm:mx-4 mt-[-20px]"></div>
-                      )}
-                    </div>
-                  )
-                })}
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Lista de Estados</h3>
@@ -265,84 +127,31 @@ const EstadosPagoPage = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[250px]">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Estado
                     </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                      Tipo
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
-                      Pagos
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
-                      Orden
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                      Fecha Creación
-                    </th>
-                    <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {estadosPago.map((estado) => {
-                    const IconComponent = getIconByType(estado.icono)
+                  {estados.map((estado) => {
+                    const IconComponent = getIconByName(estado.nombre)
+                    const color = getColorByName(estado.nombre)
                     return (
                       <tr key={estado.id} className="hover:bg-gray-50">
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div
-                              className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white mr-3 flex-shrink-0"
-                              style={{ backgroundColor: estado.color }}
-                            >
-                              <IconComponent className="h-3 w-3 sm:h-4 sm:w-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium text-gray-900">{estado.nombre}</div>
-                              <div className="text-sm text-gray-500 hidden sm:block truncate">{estado.descripcion}</div>
-                            </div>
+                        <td className="px-4 py-4 flex items-center gap-3">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                            style={{ backgroundColor: color }}
+                          >
+                            <IconComponent className="w-4 h-4" />
                           </div>
+                          <span className="text-gray-900 font-medium">{estado.nombre}</span>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-wrap gap-1">
-                            {estado.esInicial && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Inicial
-                              </span>
-                            )}
-                            {estado.esFinal && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Final
-                              </span>
-                            )}
-                            {!estado.esInicial && !estado.esFinal && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                Intermedio
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <CreditCard className="h-4 w-4 text-gray-400 mr-2" />
-                            <span className="text-sm text-gray-900">{estado.pagos}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{estado.orden}</td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <span className="hidden sm:inline">
-                            {new Date(estado.fechaCreacion).toLocaleDateString()}
-                          </span>
-                          <span className="sm:hidden">
-                            {new Date(estado.fechaCreacion).toLocaleDateString("es-ES", {
-                              day: "2-digit",
-                              month: "2-digit",
-                            })}
-                          </span>
-                        </td>
-                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex items-center justify-end space-x-1">
+                        <td className="px-4 py-4 text-right">
+                          <div className="flex items-center justify-end space-x-2">
                             <button
                               onClick={() => handleEdit(estado)}
                               className="text-blue-600 hover:text-blue-900 p-1"
@@ -355,9 +164,6 @@ const EstadosPagoPage = () => {
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
-                            <button className="text-gray-400 hover:text-gray-600 p-1">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </button>
                           </div>
                         </td>
                       </tr>
@@ -369,98 +175,42 @@ const EstadosPagoPage = () => {
           </div>
         </div>
 
-        {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                {editingEstado ? "Editar Estado" : "Nuevo Estado"}
+                {editingId ? "Editar Estado" : "Nuevo Estado"}
               </h3>
-              <form className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Estado</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                   <input
+                    name="nombre"
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ej: Procesando"
-                    defaultValue={editingEstado?.nombre || ""}
+                    placeholder="Ej: exitoso"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    required
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                  <textarea
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Describe qué significa este estado"
-                    defaultValue={editingEstado?.descripcion || ""}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                  <input
-                    type="color"
-                    className="w-full h-10 border border-gray-300 rounded-lg"
-                    defaultValue={editingEstado?.color || "#3b82f6"}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Icono</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    defaultValue={editingEstado?.icono || ""}
-                  >
-                    <option value="">Seleccionar icono</option>
-                    <option value="pending">Pendiente</option>
-                    <option value="processing">Procesando</option>
-                    <option value="authorized">Autorizado</option>
-                    <option value="completed">Completado</option>
-                    <option value="failed">Fallido</option>
-                    <option value="refunded">Reembolsado</option>
-                    <option value="cancelled">Cancelado</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Orden</label>
-                    <input
-                      type="number"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="1"
-                      defaultValue={editingEstado?.orden || ""}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        defaultChecked={editingEstado?.esInicial || false}
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Estado inicial</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        defaultChecked={editingEstado?.esFinal || false}
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Estado final</span>
-                    </label>
-                  </div>
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
                     onClick={() => {
                       setShowModal(false)
-                      setEditingEstado(null)
+                      setEditingId(null)
+                      setNombre("")
                     }}
                     className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
                     Cancelar
                   </button>
-                  <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    {editingEstado ? "Actualizar" : "Crear"}
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    {editingId ? "Actualizar" : "Crear"}
                   </button>
                 </div>
               </form>

@@ -47,3 +47,41 @@ export const crearEstadoCampana = (nombre) =>
 export const actualizarEstadoCampana = (id, nombre) =>
   authFetch(`/catalogos/estados-campana/${id}`, { method: "PUT", body: JSON.stringify({ nombre }) })
 export const eliminarEstadoCampana = (id) => authFetch(`/catalogos/estados-campana/${id}`, { method: "DELETE" })
+
+// ESTADOS ENTREGA 
+export const listarEstadosEntrega = () => authFetch("/catalogos/estados-entrega")
+export const crearEstadoEntrega = (nombre) =>
+  authFetch("/catalogos/estados-entrega", { method: "POST", body: JSON.stringify({ nombre }) })
+export const actualizarEstadoEntrega = (id, nombre) =>
+  authFetch(`/catalogos/estados-entrega/${id}`, { method: "PUT", body: JSON.stringify({ nombre }) })
+export const eliminarEstadoEntrega = (id) =>
+  authFetch(`/catalogos/estados-entrega/${id}`, { method: "DELETE" })
+
+// Estados de Pago
+export const listarEstadosPago = () => authFetch("/catalogos/estados-pago")
+export const crearEstadoPago = (nombre) =>
+  authFetch("/catalogos/estados-pago", {method: "POST", body: JSON.stringify({ nombre }) })
+export const actualizarEstadoPago = (id, nombre) =>
+  authFetch(`/catalogos/estados-pago/${id}`, {method: "PUT", body: JSON.stringify({ nombre }) })
+export const eliminarEstadoPago = (id) =>
+  authFetch(`/catalogos/estados-pago/${id}`, {method: "DELETE" })
+
+// Métodos de Pago
+export const listarMetodosPago = () => authFetch("/catalogos/metodos-pago")
+export const crearMetodoPago = (nombre) =>
+  authFetch("/catalogos/metodos-pago", {method: "POST", body: JSON.stringify({ nombre }) })
+export const actualizarMetodoPago = (id, nombre) =>
+  authFetch(`/catalogos/metodos-pago/${id}`, {method: "PUT", body: JSON.stringify({ nombre }) })
+export const eliminarMetodoPago = (id) =>
+  authFetch(`/catalogos/metodos-pago/${id}`, {method: "DELETE" })
+
+// Planes de Suscripción
+export const listarPlanes = () => authFetch("/subscription/planes")
+export const obtenerPlan = (id) => authFetch(`/subscription/planes/${id}`)
+export const crearPlan = (nombre, precio_mensual, descripcion) =>
+  authFetch("/subscription/planes", {method: "POST", body: JSON.stringify({ nombre, precio_mensual, descripcion }) })
+export const actualizarPlan = (id, nombre, precio_mensual, descripcion) =>
+  authFetch(`/subscription/planes/${id}`, {method: "PUT", body: JSON.stringify({ nombre, precio_mensual, descripcion }) })
+export const eliminarPlan = (id) =>
+  authFetch(`/subscription/planes/${id}`, { method: "DELETE" })
+

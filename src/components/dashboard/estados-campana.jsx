@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react"
 import {
   Plus,
-  Play, Pause, CheckCircle, XCircle, Clock, Target
+  Edit,
+  Trash2,
+  Play,
+  Pause,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Target
 } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
 import {
@@ -13,18 +20,28 @@ import {
   eliminarEstadoCampana
 } from "../../services/api-admin"
 
-const estadoIconos = {
-  borrador: { icono: Target, color: "#6b7280" },
-  programada: { icono: Clock, color: "#f59e0b" },
-  enviada: { icono: Play, color: "#10b981" },
-  pausada: { icono: Pause, color: "#f97316" },
-  completada: { icono: CheckCircle, color: "#059669" },
-  cerrada: { icono: XCircle, color: "#dc2626" },
+const getIconByName = (nombre) => {
+  const iconos = {
+    borrador: Target,
+    programada: Clock,
+    enviada: Play,
+    pausada: Pause,
+    completada: CheckCircle,
+    cerrada: XCircle,
+  }
+  return iconos[nombre?.toLowerCase()] || Target
 }
 
-const getIconData = (nombre) => {
-  const key = nombre?.toLowerCase()
-  return estadoIconos[key] || { icono: Target, color: "#3b82f6" }
+const getColorByName = (nombre) => {
+  const colores = {
+    borrador: "#6b7280",
+    programada: "#f59e0b",
+    enviada: "#10b981",
+    pausada: "#f97316",
+    completada: "#059669",
+    cerrada: "#dc2626",
+  }
+  return colores[nombre?.toLowerCase()] || "#3b82f6"
 }
 
 const EstadosCampanaPage = () => {
@@ -38,7 +55,7 @@ const EstadosCampanaPage = () => {
       const data = await listarEstadosCampana()
       setEstados(data)
     } catch (error) {
-      console.error("Error al obtener estados:", error)
+      console.error("Error al obtener estados de campaña:", error)
     }
   }
 
@@ -60,7 +77,6 @@ const EstadosCampanaPage = () => {
       fetchEstados()
     } catch (error) {
       console.error("Error al guardar estado:", error)
-      alert("Hubo un error al guardar. Revisa la consola.")
     }
   }
 
@@ -84,89 +100,101 @@ const EstadosCampanaPage = () => {
   return (
     <DashboardLayout activeSection="estados-campana">
       <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Estados de Campaña</h1>
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            <Plus className="inline w-4 h-4 mr-2" /> Nuevo Estado
-          </button>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Estados de Campaña</h1>
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">
+                Administra los estados posibles para una campaña dentro del sistema
+              </p>
+            </div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Nuevo Estado</span>
+            </button>
+          </div>
         </div>
 
-        {/* Visualización flujo */}
-        <div className="flex gap-6 mb-8">
-          {estados.map((estado) => {
-            const { icono: Icon, color } = getIconData(estado.nombre)
-            return (
-              <div key={estado.id} className="flex flex-col items-center">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white"
-                  style={{ backgroundColor: color }}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className="mt-1 text-sm font-medium">{estado.nombre}</span>
-              </div>
-            )
-          })}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Lista de Estados</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <div className="min-w-full inline-block align-middle">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {estados.map((estado) => {
+                    const IconComponent = getIconByName(estado.nombre)
+                    const color = getColorByName(estado.nombre)
+                    return (
+                      <tr key={estado.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-4 flex items-center gap-3">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                            style={{ backgroundColor: color }}
+                          >
+                            <IconComponent className="w-4 h-4" />
+                          </div>
+                          <span className="text-gray-900 font-medium">{estado.nombre}</span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              onClick={() => handleEdit(estado)}
+                              className="text-blue-600 hover:text-blue-900 p-1"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(estado.id)}
+                              className="text-red-600 hover:text-red-900 p-1"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        {/* Tabla */}
-        <table className="w-full bg-white shadow-sm rounded-xl overflow-hidden">
-          <thead className="bg-gray-50 text-left">
-            <tr>
-              <th className="p-4">Nombre</th>
-              <th className="p-4 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {estados.map((estado) => {
-              const { icono: Icon, color } = getIconData(estado.nombre)
-              return (
-                <tr key={estado.id} className="border-t">
-                  <td className="p-4 flex items-center gap-3">
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white"
-                      style={{ backgroundColor: color }}
-                    >
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <span className="text-gray-900 font-medium">{estado.nombre}</span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button onClick={() => handleEdit(estado)} className="text-blue-600 hover:underline mr-3">
-                      Editar
-                    </button>
-                    <button onClick={() => handleDelete(estado.id)} className="text-red-600 hover:underline">
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-
-        {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {editingId ? "Editar Estado" : "Nuevo Estado"}
-              </h2>
+              </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block mb-1 text-sm font-medium">Nombre</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                   <input
+                    name="nombre"
                     type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ej: enviada"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div className="flex justify-end gap-3">
+                <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -174,11 +202,14 @@ const EstadosCampanaPage = () => {
                       setEditingId(null)
                       setNombre("")
                     }}
-                    className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
                     Cancelar
                   </button>
-                  <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
                     {editingId ? "Actualizar" : "Crear"}
                   </button>
                 </div>
