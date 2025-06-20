@@ -85,3 +85,22 @@ export const actualizarPlan = (id, nombre, precio_mensual, descripcion) =>
 export const eliminarPlan = (id) =>
   authFetch(`/subscription/planes/${id}`, { method: "DELETE" })
 
+// Tipos de Pregunta
+export const listarTiposPregunta = () => authFetch("/catalogos/tipos-pregunta")
+
+export const crearTipoPregunta = (data) =>
+  authFetch("/catalogos/tipos-pregunta", {
+    method: "POST",
+    body: JSON.stringify(data),
+  })
+
+export const actualizarTipoPregunta = (id, data) =>
+  authFetch(`/catalogos/tipos-pregunta/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  })
+
+export const eliminarTipoPregunta = (id) =>
+  authFetch(`/catalogos/tipos-pregunta/${id}`, {
+    method: "DELETE",
+  })

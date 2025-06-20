@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Plus,
   Edit,
@@ -14,98 +14,47 @@ import {
   FileText,
 } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
-
+import {
+  listarTiposPregunta,
+  crearTipoPregunta,
+  actualizarTipoPregunta,
+  eliminarTipoPregunta,
+} from "../../services/api-admin"
 const TiposPreguntaPage = () => {
-  const [tiposPreguntas, setTiposPreguntas] = useState([
-    {
-      id: 1,
-      nombre: "Texto Libre",
-      descripcion: "Respuesta de texto abierto sin restricciones",
-      icono: "text",
-      categoria: "Abierta",
-      configuracion: {
-        longitudMaxima: 500,
-        multilínea: true,
-        validacion: "ninguna",
-      },
-      usosActivos: 45,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 2,
-      nombre: "Opción Múltiple",
-      descripcion: "Selección única entre varias opciones",
-      icono: "radio",
-      categoria: "Cerrada",
-      configuracion: {
-        opcionesMinimas: 2,
-        opcionesMaximas: 10,
-        permitirOtros: true,
-      },
-      usosActivos: 128,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 3,
-      nombre: "Selección Múltiple",
-      descripcion: "Permite seleccionar múltiples opciones",
-      icono: "checkbox",
-      categoria: "Cerrada",
-      configuracion: {
-        seleccionMinima: 1,
-        seleccionMaxima: 5,
-        permitirOtros: true,
-      },
-      usosActivos: 89,
-      fechaCreacion: "2024-01-20",
-    },
-    {
-      id: 4,
-      nombre: "Escala de Valoración",
-      descripcion: "Calificación numérica en escala definida",
-      icono: "star",
-      categoria: "Escala",
-      configuracion: {
-        valorMinimo: 1,
-        valorMaximo: 5,
-        etiquetas: ["Muy malo", "Malo", "Regular", "Bueno", "Excelente"],
-      },
-      usosActivos: 67,
-      fechaCreacion: "2024-02-01",
-    },
-    {
-      id: 5,
-      nombre: "Fecha",
-      descripcion: "Selección de fecha con calendario",
-      icono: "calendar",
-      categoria: "Específica",
-      configuracion: {
-        formatoFecha: "DD/MM/YYYY",
-        fechaMinima: null,
-        fechaMaxima: null,
-      },
-      usosActivos: 23,
-      fechaCreacion: "2024-02-10",
-    },
-    {
-      id: 6,
-      nombre: "Numérica",
-      descripcion: "Entrada de valores numéricos",
-      icono: "number",
-      categoria: "Específica",
-      configuracion: {
-        valorMinimo: 0,
-        valorMaximo: 999999,
-        decimales: 2,
-      },
-      usosActivos: 34,
-      fechaCreacion: "2024-02-15",
-    },
-  ])
-
+  const [nombre, setNombre] = useState("")
+  const [categoria, setCategoria] = useState("")
+  const [icono, setIcono] = useState("")
+  const [descripcion, setDescripcion] = useState("")
+  const [tiposPreguntas, setTiposPreguntas] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [editingTipo, setEditingTipo] = useState(null)
 
+
+  useEffect(() => {
+    if (editingTipo) {
+      setNombre(editingTipo.nombre)
+      setCategoria(editingTipo.categoria)
+      setIcono(editingTipo.icono)
+      setDescripcion(editingTipo.descripcion)
+    } else {
+      setNombre("")
+      setCategoria("")
+      setIcono("")
+      setDescripcion("")
+    }
+  }, [editingTipo])
+  useEffect(() => {
+    const fetchTipos = async () => {
+      try {
+        const res = await listarTiposPregunta()
+        setTiposPreguntas(res)
+      } catch (error) {
+        console.error("Error al cargar los tipos de pregunta:", error)
+      }
+    }
+
+    fetchTipos()
+  }, [])
   const getIconByType = (icono) => {
     switch (icono) {
       case "text":
@@ -124,7 +73,6 @@ const TiposPreguntaPage = () => {
         return MessageSquare
     }
   }
-
   const getCategoriaColor = (categoria) => {
     switch (categoria) {
       case "Abierta":
@@ -139,18 +87,39 @@ const TiposPreguntaPage = () => {
         return "bg-gray-100 text-gray-800"
     }
   }
-
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      if (editingTipo) {
+        await actualizarTipoPregunta(editingTipo.id, { nombre, categoria, icono, descripcion })
+      } else {
+        await crearTipoPregunta({ nombre, categoria, icono, descripcion })
+      }
+      // Refrescar lista
+      const res = await listarTiposPregunta()
+      setTiposPreguntas(res)
+      setShowModal(false)
+      setEditingTipo(null)
+    } catch (err) {
+      console.error("Error al guardar:", err)
+    }
+  }
   const handleEdit = (tipo) => {
     setEditingTipo(tipo)
     setShowModal(true)
   }
-
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar este tipo de pregunta?")) {
-      setTiposPreguntas(tiposPreguntas.filter((tipo) => tipo.id !== id))
+      try {
+        await eliminarTipoPregunta(id)
+        const res = await listarTiposPregunta()
+        setTiposPreguntas(res)
+
+      } catch (err) {
+        console.error("Error al eliminar:", err)
+      }
     }
   }
-
   return (
     <DashboardLayout activeSection="tipos-pregunta">
       <div className="p-6">
@@ -194,7 +163,8 @@ const TiposPreguntaPage = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Usos Activos</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {tiposPreguntas.reduce((sum, tipo) => sum + tipo.usosActivos, 0)}
+                  {tiposPreguntas.reduce((sum, tipo) => sum + (tipo.usosActivos ?? 0), 0)}
+
                 </p>
               </div>
             </div>
@@ -207,7 +177,8 @@ const TiposPreguntaPage = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Más Usado</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {Math.max(...tiposPreguntas.map((t) => t.usosActivos))}
+                  {Math.max(...tiposPreguntas.map((t) => t.usosActivos ?? 0))}
+
                 </p>
               </div>
             </div>
@@ -220,7 +191,8 @@ const TiposPreguntaPage = () => {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Categorías</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {new Set(tiposPreguntas.map((t) => t.categoria)).size}
+                  {new Set(tiposPreguntas.map((t) => t.categoria || 'Sin categoría')).size}
+
                 </p>
               </div>
             </div>
@@ -230,7 +202,8 @@ const TiposPreguntaPage = () => {
         {/* Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {tiposPreguntas.map((tipo) => {
-            const IconComponent = getIconByType(tipo.icono)
+            const IconComponent = getIconByType(tipo.icono || '')
+
             return (
               <div key={tipo.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
                 <div className="flex items-start justify-between mb-4">
@@ -240,7 +213,7 @@ const TiposPreguntaPage = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{tipo.nombre}</h3>
-                      <p className="text-xs sm:text-sm text-gray-500 line-clamp-2">{tipo.descripcion}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 line-clamp-2">{tipo.descripcion || "Sin descripción"}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
@@ -259,19 +232,22 @@ const TiposPreguntaPage = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Categoría</span>
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoriaColor(tipo.categoria)}`}
-                    >
-                      {tipo.categoria}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoriaColor(tipo.categoria || '')}`}>
+                      {tipo.categoria || "Sin categoría"}
                     </span>
+
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Usos Activos</span>
-                    <span className="text-sm font-medium text-gray-900">{tipo.usosActivos}</span>
+                    <span className="text-sm font-medium text-gray-900">{tipo.usosActivos ?? 0}</span>
+
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Fecha Creación</span>
-                    <span className="text-sm text-gray-500">{new Date(tipo.fechaCreacion).toLocaleDateString()}</span>
+                    <span className="text-sm text-gray-500">
+                      {tipo.fechaCreacion ? new Date(tipo.fechaCreacion).toLocaleDateString() : "Sin fecha"}
+                    </span>
+
                   </div>
                 </div>
 
@@ -292,21 +268,23 @@ const TiposPreguntaPage = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {editingTipo ? "Editar Tipo de Pregunta" : "Nuevo Tipo de Pregunta"}
               </h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Ej: Texto Libre"
-                    defaultValue={editingTipo?.nombre || ""}
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    defaultValue={editingTipo?.categoria || ""}
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value)}
                   >
                     <option value="">Seleccionar categoría</option>
                     <option value="Abierta">Abierta</option>
@@ -319,7 +297,8 @@ const TiposPreguntaPage = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Icono</label>
                   <select
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    defaultValue={editingTipo?.icono || ""}
+                    value={icono}
+                    onChange={(e) => setIcono(e.target.value)}
                   >
                     <option value="">Seleccionar icono</option>
                     <option value="text">Texto</option>
@@ -336,7 +315,8 @@ const TiposPreguntaPage = () => {
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Describe el tipo de pregunta"
-                    defaultValue={editingTipo?.descripcion || ""}
+                    value={descripcion}
+                    onChange={(e) => setDescripcion(e.target.value)}
                   />
                 </div>
                 <div className="flex justify-end space-x-3 pt-4">
