@@ -61,12 +61,8 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      //await new Promise((resolve) => setTimeout(resolve, 2000))
-      //console.log("Login attempt:", formData)
-      // Handle successful login here
-      //alert("¡Inicio de sesión exitoso!")
+     
       await login(formData)
-      // La redirección se maneja automáticamente en el servicio de auth
     } catch (error) {
       console.error("Login error:", error)
       setErrors({ general: error.message || "Error en el inicio de sesión" })

@@ -13,8 +13,7 @@ import TiposPregunta from './components/dashboard/tipos-pregunta';
 import MetodoPago from './components/dashboard/metodos-pago';
 import EstadosCampaña from './components/dashboard/estados-campana';
 import Planes from './components/dashboard/planes';
-
-
+import PlantillasPage from './components/dashboard-suscriptor/plantillas';
 function App() {
   return (
     <Router>
@@ -33,8 +32,7 @@ function App() {
           <Route path="/dashboard/metodos-pago" element={<MetodoPago />} />
           <Route path="/dashboard/estados-campana" element={<EstadosCampaña />} />
           <Route path="/dashboard/planes" element={<Planes />} />
-
-        {/* Ruta de fallback */}
+          <Route path="/dashboard-suscriptor/plantillas" element={<PlantillasPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

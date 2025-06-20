@@ -25,6 +25,7 @@ export async function registerSuscriptor(userData) {
 
 export async function login(credentials) {
   try {
+    // Llamada a la API y autenticación
     const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: {
@@ -33,21 +34,20 @@ export async function login(credentials) {
       body: JSON.stringify(credentials),
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.detail || "Error en inicio de sesión")
-    }
-
+    // Procesar respuesta
     const data = await response.json()
-
+    console.log("Respuesta login:", data)
+    
     localStorage.setItem("token", data.access_token)
-
     const userInfo = await getCurrentUser()
+    console.log("Info de usuario:", userInfo)
 
-    if (userInfo.tipo === "admin") {
+    // Redirección según la combinación correcta de rol y tipo
+    if (userInfo.rol === "admin") {
       window.location.href = "/dashboard/roles"
-    } else if (userInfo.tipo === "empresa" || userInfo.tipo === "operator") {
-      window.location.href = "/dashboard-suscriptor"
+    } else if (userInfo.tipo === "suscriptor") {
+      // Redireccionar a todos los usuarios tipo "suscriptor" (incluye empresas y operadores)
+      window.location.href = "/dashboard-suscriptor/plantillas"
     }
 
     return { ...data, user: userInfo }
@@ -110,13 +110,11 @@ export function getAuthToken() {
   return localStorage.getItem("token")
 }
 
-export function redirectBasedOnRole(userRole) {
-  if (userRole === "admin") {
+export function redirectBasedOnRole(user) {
+  if (user.rol === "admin") {
     return "/dashboard/roles"
-  } else if (userRole === "empresa" || userRole === "suscriptor") {
-    return "/dashboard-suscriptor"
-  } else if (userRole === "operator") {
-    return "/dashboard-suscriptor" 
+  } else if (user.tipo === "suscriptor") {
+    return "/dashboard-suscriptor/plantillas"
   }
   return "/login"
 }
@@ -128,17 +126,16 @@ export async function checkRouteAccess(requiredType) {
     }
 
     const user = await getCurrentUser()
-
-    let hasAccess = false
+    let hasAccess = false;
 
     if (requiredType === "admin" && user.rol === "admin") {
-      hasAccess = true
-    } else if (requiredType === "suscriptor" && (user.rol === "empresa" || user.rol === "operator")) {
-      hasAccess = true
+      hasAccess = true;
+    } else if (requiredType === "suscriptor" && user.tipo === "suscriptor") {
+      hasAccess = true;
     }
 
     if (!hasAccess) {
-      const correctRoute = redirectBasedOnRole(user.rol)
+      const correctRoute = redirectBasedOnRole(user)
       return { hasAccess: false, redirectTo: correctRoute }
     }
 
