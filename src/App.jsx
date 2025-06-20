@@ -16,7 +16,7 @@ import Planes from './components/dashboard/planes';
 import PlantillasPage from './components/dashboard-suscriptor/plantillas';
 import CampanasPage from './components/dashboard-suscriptor/campanas';
 import DestinatariosPage from './components/dashboard-suscriptor/destinatarios';
-
+import EncuestaPage from './pages/EncuestaPage';
 function App() {
   return (
     <Router>
@@ -25,7 +25,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        
+           <Route path="/encuestas/:token" element={<EncuestaPage />} />
           <Route path="/dashboard/roles" element={<Roles />} />
           <Route path="/dashboard/canales" element={<Canales />} />
           <Route path="/dashboard/estado-documento" element={<EstadoDocumento />} />
