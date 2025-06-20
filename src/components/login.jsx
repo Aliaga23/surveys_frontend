@@ -51,18 +51,20 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log("Formulario enviado", formData)
     const newErrors = validateForm()
 
+    console.log("Errores de validación:", newErrors)
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
     }
 
     setIsLoading(true)
-
     try {
-     
+      console.log("Intentando iniciar sesión...")
       await login(formData)
+      console.log("Login exitoso")
     } catch (error) {
       console.error("Login error:", error)
       setErrors({ general: error.message || "Error en el inicio de sesión" })

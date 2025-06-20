@@ -62,7 +62,7 @@ export const createOpcion = (plantillaId, preguntaId, data) =>
     body: JSON.stringify(data),
   })
 
-// Actualizar una opción existente full patch aca
+// Actualizar una opción existente
 export const updateOpcion = (plantillaId, preguntaId, opcionId, data) =>
   authFetch(`/plantillas/${plantillaId}/preguntas/${preguntaId}/opciones/${opcionId}`, {
     method: "PATCH",
@@ -84,8 +84,14 @@ export const deleteDestinatario = (id) => authFetch(`/destinatarios/${id}`, { me
 export const getCampanas = () => authFetch("/campanas")
 export const getCampana = (id) => authFetch(`/campanas/${id}`)
 export const getCampanaFullDetail = (id) => authFetch(`/campanas/${id}/full-detail`)
-export const createCampana = (data) => authFetch("/campanas", { method: "POST", body: JSON.stringify(data) })
-export const updateCampana = (id, data) => authFetch(`/campanas/${id}`, { method: "PATCH", body: JSON.stringify(data) })
+export const createCampana = (data) => {
+  const cleanData = Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== "" && value !== null))
+  return authFetch("/campanas", { method: "POST", body: JSON.stringify(cleanData) })
+}
+export const updateCampana = (id, data) => {
+  const cleanData = Object.fromEntries(Object.entries(data).filter(([_, value]) => value !== "" && value !== null))
+  return authFetch(`/campanas/${id}`, { method: "PATCH", body: JSON.stringify(cleanData) })
+}
 export const deleteCampana = (id) => authFetch(`/campanas/${id}`, { method: "DELETE" })
 
 // Entregas

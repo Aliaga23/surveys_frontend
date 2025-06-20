@@ -22,7 +22,6 @@ export async function registerSuscriptor(userData) {
   }
 }
 
-
 export async function login(credentials) {
   try {
     // Llamada a la API y autenticación
@@ -37,7 +36,7 @@ export async function login(credentials) {
     // Procesar respuesta
     const data = await response.json()
     console.log("Respuesta login:", data)
-    
+
     localStorage.setItem("token", data.access_token)
     const userInfo = await getCurrentUser()
     console.log("Info de usuario:", userInfo)
@@ -89,7 +88,7 @@ export async function getCurrentUser() {
 
     return {
       ...userData,
-      tipo: userType, 
+      tipo: userType,
     }
   } catch (error) {
     console.error("Error al obtener usuario actual:", error)
@@ -126,12 +125,12 @@ export async function checkRouteAccess(requiredType) {
     }
 
     const user = await getCurrentUser()
-    let hasAccess = false;
+    let hasAccess = false
 
     if (requiredType === "admin" && user.rol === "admin") {
-      hasAccess = true;
+      hasAccess = true
     } else if (requiredType === "suscriptor" && user.tipo === "suscriptor") {
-      hasAccess = true;
+      hasAccess = true
     }
 
     if (!hasAccess) {
