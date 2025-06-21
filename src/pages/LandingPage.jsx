@@ -18,11 +18,12 @@ import {
   Menu,
   X,
 } from "lucide-react"
+import { useAuth } from "../context/AuthContext";
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [email, setEmail] = useState("")
-
+  const { isAuthenticated, user } = useAuth();
   const handleSubmit = (e) => {
     e.preventDefault()
     // Handle form submission
@@ -55,15 +56,26 @@ const LandingPage = () => {
               <a href="#precios" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Precios
               </a>
-              <a href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
-                Iniciar sesión
-              </a>
-              <a
-                href="/register"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                Registrarse
-              </a>
+              {isAuthenticated ? (
+                <a
+                  href={user?.tipo === "admin" ? "/dashboard/roles" : "/dashboard-suscriptor/plantillas"}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Ir al dashboard
+                </a>
+              ) : (
+                <>
+                  <a href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
+                    Iniciar sesión
+                  </a>
+                  <a
+                    href="/register"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Registrarse
+                  </a>
+                </>
+              )}
             </div>
 
             {/* Mobile menu button */}
@@ -90,12 +102,23 @@ const LandingPage = () => {
                 <a href="#precios" className="text-gray-600 hover:text-blue-600">
                   Precios
                 </a>
-                <a href="/login" className="text-gray-600 hover:text-blue-600">
-                  Iniciar sesión
-                </a>
-                <a href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-center">
-                  Registrarse
-                </a>
+                {isAuthenticated ? (
+                  <a
+                    href={user?.tipo === "admin" ? "/dashboard/roles" : "/dashboard-suscriptor/plantillas"}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-center"
+                  >
+                    Ir al dashboard
+                  </a>
+                ) : (
+                  <>
+                    <a href="/login" className="text-gray-600 hover:text-blue-600">
+                      Iniciar sesión
+                    </a>
+                    <a href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-center">
+                      Registrarse
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -639,124 +662,124 @@ const LandingPage = () => {
       </section>
 
       {/* FOOTER */}
-    <footer className="bg-gray-900 text-white py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <div className="flex items-center mb-4">
-              <BarChart3 className="h-8 w-8 text-blue-400 mr-2" />
-              <span className="text-xl font-bold">SurveySaaS</span>
+      <footer className="bg-gray-900 text-white py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center mb-4">
+                <BarChart3 className="h-8 w-8 text-blue-400 mr-2" />
+                <span className="text-xl font-bold">SurveySaaS</span>
+              </div>
+              <p className="text-gray-400 mb-4">
+                Automatización inteligente de encuestas y documentos para empresas modernas.
+              </p>
+              <div className="flex space-x-4">
+                <a href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors">
+                  LinkedIn
+                </a>
+                <a href="https://twitter.com" className="text-gray-400 hover:text-white transition-colors">
+                  Twitter
+                </a>
+              </div>
             </div>
-            <p className="text-gray-400 mb-4">
-              Automatización inteligente de encuestas y documentos para empresas modernas.
+
+            <div>
+              <h3 className="font-semibold mb-4">Producto</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Funcionalidades
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Precios
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Integraciones
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    API
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4">Empresa</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Sobre nosotros
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Carreras
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Prensa
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4">Soporte</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Centro de ayuda
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Documentación
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Estado del servicio
+                  </a>
+                </li>
+                <li>
+                  <a href="https://example.com" className="hover:text-white transition-colors">
+                    Contacto
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              &copy; {new Date().getFullYear()} SurveySaaS. Todos los derechos reservados.
             </p>
-            <div className="flex space-x-4">
-              <a href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors">
-                LinkedIn
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Política de Privacidad
               </a>
-              <a href="https://twitter.com" className="text-gray-400 hover:text-white transition-colors">
-                Twitter
+              <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Términos de Servicio
+              </a>
+              <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Cookies
               </a>
             </div>
           </div>
-
-          <div>
-            <h3 className="font-semibold mb-4">Producto</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Funcionalidades
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Precios
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Integraciones
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  API
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-4">Empresa</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Sobre nosotros
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Carreras
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Prensa
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-4">Soporte</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Centro de ayuda
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Documentación
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Estado del servicio
-                </a>
-              </li>
-              <li>
-                <a href="https://example.com" className="hover:text-white transition-colors">
-                  Contacto
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
-
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            &copy; {new Date().getFullYear()} SurveySaaS. Todos los derechos reservados.
-          </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Política de Privacidad
-            </a>
-            <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Términos de Servicio
-            </a>
-            <a href="https://example.com" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Cookies
-            </a>
-          </div>
-        </div>
-      </div>
-    </footer>
+      </footer>
 
     </div>
   )

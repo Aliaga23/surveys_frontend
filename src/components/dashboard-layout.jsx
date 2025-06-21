@@ -29,7 +29,8 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "./sidebar"
-
+import { useAuth } from "../context/AuthContext"
+import { useNavigate } from "react-router-dom"
 const DashboardLayout = ({ children, activeSection = "roles" }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user] = useState({
@@ -127,7 +128,12 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
   ]
 
   const closeSidebar = () => setSidebarOpen(false)
-
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
@@ -169,7 +175,10 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
               <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
               <p className="text-xs text-gray-500 truncate">{user.email}</p>
             </div>
-            <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
+            <button
+              onClick={handleLogout}
+              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+            >
               <LogOut className="h-4 w-4" />
             </button>
           </div>
