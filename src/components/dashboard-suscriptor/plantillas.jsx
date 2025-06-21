@@ -1,5 +1,5 @@
 "use client"
-
+import { useCallback } from "react"
 import { useState, useEffect } from "react"
 import {
   getPlantillas,
@@ -54,39 +54,23 @@ export default function Plantillas() {
     loadData()
   }, [])
 
-  useEffect(() => {
-    filterPlantillas()
-  }, [plantillas, searchTerm, filterStatus])
+ const filterPlantillas = useCallback(() => {
+  let filtered = plantillas
 
-  const loadData = async () => {
-    try {
-      setLoading(true)
-      const plantillasData = await getPlantillas()
-      setPlantillas(plantillasData)
-    } catch (err) {
-      setError("Error al cargar datos: " + err.message)
-    } finally {
-      setLoading(false)
-    }
+  if (searchTerm) {
+    filtered = filtered.filter(
+      (plantilla) =>
+        plantilla.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        plantilla.descripcion.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
   }
 
-  const filterPlantillas = () => {
-    let filtered = plantillas
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (plantilla) =>
-          plantilla.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          plantilla.descripcion.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    }
-
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((plantilla) => (filterStatus === "active" ? plantilla.activo : !plantilla.activo))
-    }
-
-    setFilteredPlantillas(filtered)
+  if (filterStatus !== "all") {
+    filtered = filtered.filter((plantilla) => (filterStatus === "active" ? plantilla.activo : !plantilla.activo))
   }
+
+  setFilteredPlantillas(filtered)
+}, [plantillas, searchTerm, filterStatus])
 
   const loadPreguntas = async (plantillaId) => {
     try {
@@ -111,6 +95,25 @@ export default function Plantillas() {
       setError("Error al cargar preguntas: " + err.message)
     }
   }
+
+  useEffect(() => {
+    filterPlantillas()
+  }, [filterPlantillas])
+
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      const plantillasData = await getPlantillas()
+      setPlantillas(plantillasData)
+    } catch (err) {
+      setError("Error al cargar datos: " + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+ 
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -262,7 +265,6 @@ export default function Plantillas() {
   }
 
   const renderPreguntaPreview = (pregunta) => {
-    const tipo = tiposPregunta.find((t) => t.id === pregunta.tipo_pregunta_id)
 
     switch (pregunta.tipo_pregunta_id) {
       case 1: // Texto
