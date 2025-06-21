@@ -143,3 +143,43 @@ export async function checkRouteAccess(requiredType) {
     return { hasAccess: false, redirectTo: "/login" }
   }
 }
+
+export async function verifyRegistrationRequest(token) {
+  try {
+    const response = await fetch(`${API_URL}/auth/verify-registration?token=${token}`, {
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Error al verificar la cuenta");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en verificación de cuenta:", error);
+    throw error;
+  }
+}
+
+export async function requestVerificationEmail(email) {
+  try {
+    const response = await fetch(`${API_URL}/auth/request-verification`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Error al solicitar reenvío de verificación");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en solicitud de verificación:", error);
+    throw error;
+  }
+}

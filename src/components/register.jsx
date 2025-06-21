@@ -2,7 +2,10 @@
 
 import { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, User, Building, ArrowRight, BarChart3, Menu, X } from "lucide-react"
-import { registerSuscriptor, login } from "../services/auth"
+import { registerSuscriptor} from "../services/auth"
+import { useNavigate } from "react-router-dom"
+
+
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +19,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -82,13 +86,8 @@ const Register = () => {
         password: formData.password,
       })
 
-      // Hacer login automático después del registro
-      await login({
-        email: formData.email,
-        password: formData.password,
-      })
-
-      // La redirección se maneja automáticamente en el servicio de auth
+      // Redirigir a la página de confirmación de email
+      navigate("/email-sent")
     } catch (error) {
       console.error("Registration error:", error)
       setErrors({ general: error.message || "Error en el registro" })
@@ -96,6 +95,7 @@ const Register = () => {
       setIsLoading(false)
     }
   }
+
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50">

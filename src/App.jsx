@@ -20,6 +20,8 @@ import EncuestaPage from './pages/EncuestaPage';
 import EntregasPage from './components/dashboard-suscriptor/entregas';
 import RespuestasPage from './components/dashboard-suscriptor/respuestas';
 import PrivateRoute from './components/PrivateRoute';
+import EmailSentPage from './pages/EmailSentPage';
+import VerifyRegistrationPage from './pages/VerifyRegistrationPage'; // Lo crearás luego
 function App() {
   return (
     <Router>
@@ -29,7 +31,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/encuestas/:token" element={<EncuestaPage />} />
-
+        <Route path="/email-sent" element={<EmailSentPage />} />
+        <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
         {/* Rutas protegidas - admin */}
         <Route path="/dashboard/roles" element={
           <PrivateRoute requiredType="admin"><Roles /></PrivateRoute>
