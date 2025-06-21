@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { getCampanas, getCampanaFullDetail } from "../../services/api"
 import DashboardSuscriptorLayout from "./layout"
 
@@ -14,84 +14,86 @@ export default function Respuestas() {
   const [selectedRespuesta, setSelectedRespuesta] = useState(null)
   const [searchTerm, setSearchTerm] = useState("")
 
-  useEffect(() => {
-    loadData()
-  }, [])
 
-  const loadData = async () => {
-    try {
-      setLoading(true)
-      const campanasData = await getCampanas()
-      setCampanas(campanasData)
-      await loadAllRespuestas()
-    } catch (err) {
-      setError("Error al cargar la información: " + err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+const loadAllRespuestas = useCallback(async () => {
+  try {
+    const campanasData = await getCampanas()
+    const allRespuestas = []
 
-  const loadAllRespuestas = async () => {
-    try {
-      const campanasData = await getCampanas()
-      const allRespuestas = []
-
-      for (const campana of campanasData) {
-        try {
-          const fullDetail = await getCampanaFullDetail(campana.id)
-          if (fullDetail.entregas) {
-            fullDetail.entregas.forEach((entrega) => {
-              if (entrega.respuestas && entrega.respuestas.length > 0) {
-                entrega.respuestas.forEach((respuesta) => {
-                  allRespuestas.push({
-                    id: respuesta.id,
-                    campana_id: campana.id,
-                    campana_nombre: campana.nombre,
-                    entrega_id: entrega.id,
-                    destinatario_email: entrega.destinatario?.email || "N/A",
-                    destinatario_nombre: entrega.destinatario?.nombre || "N/A",
-                    destinatario_telefono: entrega.destinatario?.telefono || "N/A",
-                    completada: entrega.estado_id === 3,
-                    fecha_respuesta: respuesta.recibido_en,
-                    enviado_en: entrega.enviado_en,
-                    respondido_en: entrega.respondido_en,
-                    respuestas_detalle:
-                      respuesta.respuestas_preguntas?.map((rp) => ({
-                        pregunta_id: rp.pregunta_id,
-                        pregunta_texto:
-                          fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.texto ||
-                          "Pregunta no encontrada",
-                        tipo_pregunta: getTipoPreguntaName(
-                          fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.tipo_pregunta_id,
-                        ),
-                        obligatoria:
-                          fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.obligatorio || false,
-                        respuesta_valor:
-                          rp.texto ||
-                          rp.numero ||
-                          getOpcionTexto(
-                            fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.opciones,
-                            rp.opcion_id,
-                          ) ||
-                          "Sin respuesta",
-                        metadatos: rp.metadatos,
-                      })) || [],
-                  })
+    for (const campana of campanasData) {
+      try {
+        const fullDetail = await getCampanaFullDetail(campana.id)
+        if (fullDetail.entregas) {
+          fullDetail.entregas.forEach((entrega) => {
+            if (entrega.respuestas && entrega.respuestas.length > 0) {
+              entrega.respuestas.forEach((respuesta) => {
+                allRespuestas.push({
+                  id: respuesta.id,
+                  campana_id: campana.id,
+                  campana_nombre: campana.nombre,
+                  entrega_id: entrega.id,
+                  destinatario_email: entrega.destinatario?.email || "N/A",
+                  destinatario_nombre: entrega.destinatario?.nombre || "N/A",
+                  destinatario_telefono: entrega.destinatario?.telefono || "N/A",
+                  completada: entrega.estado_id === 3,
+                  fecha_respuesta: respuesta.recibido_en,
+                  enviado_en: entrega.enviado_en,
+                  respondido_en: entrega.respondido_en,
+                  respuestas_detalle:
+                    respuesta.respuestas_preguntas?.map((rp) => ({
+                      pregunta_id: rp.pregunta_id,
+                      pregunta_texto:
+                        fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.texto ||
+                        "Pregunta no encontrada",
+                      tipo_pregunta: getTipoPreguntaName(
+                        fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.tipo_pregunta_id,
+                      ),
+                      obligatoria:
+                        fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.obligatorio || false,
+                      respuesta_valor:
+                        rp.texto ||
+                        rp.numero ||
+                        getOpcionTexto(
+                          fullDetail.plantilla?.preguntas?.find((p) => p.id === rp.pregunta_id)?.opciones,
+                          rp.opcion_id,
+                        ) ||
+                        "Sin respuesta",
+                      metadatos: rp.metadatos,
+                    })) || [],
                 })
-              }
-            })
-          }
-        } catch (err) {
-          console.warn(`Error al cargar campaña ${campana.id}:`, err.message)
+              })
+            }
+          })
         }
+      } catch (err) {
+        console.warn(`Error al cargar campaña ${campana.id}:`, err.message)
       }
-
-      setRespuestas(allRespuestas)
-    } catch (err) {
-      setError("Error al cargar las respuestas: " + err.message)
-      setRespuestas([])
     }
+
+    setRespuestas(allRespuestas)
+  } catch (err) {
+    setError("Error al cargar las respuestas: " + err.message)
+    setRespuestas([])
   }
+}, [])
+
+const loadData = useCallback(async () => {
+  try {
+    setLoading(true)
+    const campanasData = await getCampanas()
+    setCampanas(campanasData)
+    await loadAllRespuestas()
+  } catch (err) {
+    setError("Error al cargar la información: " + err.message)
+  } finally {
+    setLoading(false)
+  }
+}, [loadAllRespuestas])
+
+useEffect(() => {
+  loadData()
+}, [loadData])
+
 
   const getTipoPreguntaName = (tipoId) => {
     const tipos = {
