@@ -6,66 +6,7 @@ import DashboardLayout from "../dashboard-layout"
 import { actualizarCanal, crearCanal, eliminarCanal, listarCanales } from "../../services/api-admin"
 
 const CanalesPage = () => {
-  const [canales, setCanales] = useState([
-    {
-      id: 1,
-      nombre: "Email",
-      tipo: "email",
-      descripcion: "Envío de encuestas por correo electrónico",
-      configuracion: {
-        servidor: "smtp.surveysaas.com",
-        puerto: 587,
-        ssl: true,
-      },
-      estado: "activo",
-      encuestasEnviadas: 1250,
-      tasaRespuesta: 23.5,
-      fechaCreacion: "2024-01-15",
-    },
-    {
-      id: 2,
-      nombre: "WhatsApp Business",
-      tipo: "whatsapp",
-      descripcion: "Distribución vía WhatsApp Business API",
-      configuracion: {
-        apiKey: "wa_***************",
-        webhook: "https://api.surveysaas.com/webhook/wa",
-      },
-      estado: "activo",
-      encuestasEnviadas: 890,
-      tasaRespuesta: 45.2,
-      fechaCreacion: "2024-01-20",
-    },
-    {
-      id: 3,
-      nombre: "SMS",
-      tipo: "sms",
-      descripcion: "Mensajes de texto con enlaces a encuestas",
-      configuracion: {
-        proveedor: "Twilio",
-        numeroOrigen: "+34900123456",
-      },
-      estado: "activo",
-      encuestasEnviadas: 567,
-      tasaRespuesta: 18.7,
-      fechaCreacion: "2024-02-01",
-    },
-    {
-      id: 4,
-      nombre: "Web Embed",
-      tipo: "web",
-      descripcion: "Widget embebido en sitios web",
-      configuracion: {
-        dominio: "surveysaas.com",
-        ssl: true,
-        responsive: true,
-      },
-      estado: "activo",
-      encuestasEnviadas: 2340,
-      tasaRespuesta: 12.3,
-      fechaCreacion: "2024-02-10",
-    },
-  ])
+  const [canales, setCanales] = useState([])
 
   useEffect(() => {
     async function fetchCanales() {
@@ -75,7 +16,7 @@ const CanalesPage = () => {
         const dataConValoresPorDefecto = data.map((canal) => ({
           ...canal,
           tipo: canal.tipo || "email",
-          descripcion: canal.descripcion || "Canal de distribución",
+          descripcion: canal.descripcion || "Sin tipo",
           configuracion: canal.configuracion || {},
           estado: canal.estado || "activo",
           encuestasEnviadas: canal.encuestasEnviadas ?? 0,
@@ -91,7 +32,6 @@ const CanalesPage = () => {
 
     fetchCanales()
   }, [])
-  console.log('Canales', canales)
   const [showModal, setShowModal] = useState(false)
   const [editingCanal, setEditingCanal] = useState(null)
 
@@ -139,7 +79,7 @@ const CanalesPage = () => {
         const normalizados = actualizados.map((c) => ({
           ...c,
           tipo: c.tipo || "email",
-          descripcion: c.descripcion || "Canal de distribución",
+          descripcion: c.descripcion || "Sin tipo",
           configuracion: c.configuracion || {},
           estado: c.estado || "activo",
           encuestasEnviadas: c.encuestasEnviadas ?? 0,
@@ -327,7 +267,7 @@ const CanalesPage = () => {
                     const normalizados = actualizados.map((c) => ({
                       ...c,
                       tipo: c.tipo || "email",
-                      descripcion: c.descripcion || "Canal de distribución",
+                      descripcion: c.descripcion || "Sin tipo",
                       configuracion: c.configuracion || {},
                       estado: c.estado || "activo",
                       encuestasEnviadas: c.encuestasEnviadas ?? 0,
@@ -353,28 +293,7 @@ const CanalesPage = () => {
                     defaultValue={editingCanal?.nombre || ""}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                  <select
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    defaultValue={editingCanal?.tipo || ""}
-                  >
-                    <option value="">Seleccionar tipo</option>
-                    <option value="email">Email</option>
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="sms">SMS</option>
-                    <option value="web">Web</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                  <textarea
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Describe el canal y su propósito"
-                    defaultValue={editingCanal?.descripcion || ""}
-                  />
-                </div>
+                
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
