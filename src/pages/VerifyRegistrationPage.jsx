@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
 import { verifyRegistrationRequest } from '../services/auth';
@@ -8,8 +8,8 @@ const VerifyRegistrationPage = () => {
   const [message, setMessage] = useState('');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const hasVerified = useRef(false); // Esto asegura una sola ejecución
 
-  // Extraer el token una sola vez
   const token = searchParams.get('token');
 
   useEffect(() => {
@@ -18,6 +18,12 @@ const VerifyRegistrationPage = () => {
       setMessage('Token no proporcionado.');
       return;
     }
+
+    if (hasVerified.current) {
+      return; // Si ya verificamos, no lo hacemos otra vez
+    }
+
+    hasVerified.current = true; // Marcamos que ya hicimos la verificación
 
     const verify = async () => {
       try {
