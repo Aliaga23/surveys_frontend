@@ -304,14 +304,11 @@ const Register = () => {
                 />
                 <label htmlFor="acceptTerms" className="ml-3 text-sm text-gray-700">
                   Acepto los{" "}
-                  <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
-                    términos y condiciones
-                  </a>{" "}
+                  <span className="font-medium text-gray-800">términos y condiciones</span>{" "}
                   y la{" "}
-                  <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
-                    política de privacidad
-                  </a>
+                  <span className="font-medium text-gray-800">política de privacidad</span>
                 </label>
+
               </div>
               {errors.acceptTerms && <p className="text-sm text-red-600">{errors.acceptTerms}</p>}
 

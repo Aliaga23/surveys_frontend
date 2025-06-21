@@ -233,11 +233,6 @@ const Login = () => {
                     Recordarme
                   </label>
                 </div>
-                <div className="text-sm">
-                  <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
-                    ¿Olvidaste tu contraseña?
-                  </a>
-                </div>
               </div>
 
               {/* Submit Button */}
