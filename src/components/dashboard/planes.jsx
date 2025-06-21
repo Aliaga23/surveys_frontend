@@ -5,11 +5,8 @@ import {
   Plus,
   Edit,
   Trash2,
-  MoreHorizontal,
   Crown,
   CheckCircle,
-  Users,
-  DollarSign,
 } from "lucide-react";
 import DashboardLayout from "../dashboard-layout";
 import {
