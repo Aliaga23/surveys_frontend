@@ -97,8 +97,8 @@ export default function Respuestas() {
     const tipos = {
       1: "Texto Libre",
       2: "Numérico",
-      3: "Selección Múltiple",
-      4: "Fecha",
+      3: "Selección Unica",
+      4: "Selección Múltiple",
     }
     return tipos[tipoId] || "No Especificado"
   }
