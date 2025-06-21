@@ -183,3 +183,25 @@ export async function requestVerificationEmail(email) {
     throw error;
   }
 }
+
+export async function requestRegistration(userData) {
+  try {
+    const response = await fetch(`${API_URL}/auth/request-registration`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Error al solicitar registro");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error en solicitud de registro:", error);
+    throw error;
+  }
+}
