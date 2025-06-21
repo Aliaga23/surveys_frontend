@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
-import { verifyRegistrationRequest } from '../services/auth'; // Asegúrate de tener este servicio implementado
+import { verifyRegistrationRequest } from '../services/auth';
 
 const VerifyRegistrationPage = () => {
   const [status, setStatus] = useState('loading'); // loading, success, error
@@ -9,8 +9,10 @@ const VerifyRegistrationPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  // Extraer el token una sola vez
+  const token = searchParams.get('token');
+
   useEffect(() => {
-    const token = searchParams.get('token');
     if (!token) {
       setStatus('error');
       setMessage('Token no proporcionado.');
@@ -33,7 +35,7 @@ const VerifyRegistrationPage = () => {
     };
 
     verify();
-  }, [searchParams, navigate]);
+  }, [token, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4">
