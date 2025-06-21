@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 
 const API_BASE_URL = "https://surveysbackend-production.up.railway.app"
 
@@ -15,16 +15,12 @@ export default function EncuestaPublica({ token }) {
   const [showProgress, setShowProgress] = useState(false)
 
   useEffect(() => {
-    verificarToken()
-  }, [token])
-
-  useEffect(() => {
     if (encuestaData) {
       setShowProgress(encuestaData.plantilla.preguntas.length > 3)
     }
   }, [encuestaData])
 
-  const verificarToken = async () => {
+  const verificarToken = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`${API_BASE_URL}/encuestas/verificar/${token}`)
@@ -37,7 +33,6 @@ export default function EncuestaPublica({ token }) {
       const data = await response.json()
       setEncuestaData(data)
 
-      // Inicializar respuestas vacías
       const respuestasIniciales = {}
       data.plantilla.preguntas.forEach((pregunta) => {
         if (pregunta.tipo_pregunta_id === 4) {
@@ -52,7 +47,11 @@ export default function EncuestaPublica({ token }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [token])
+
+  useEffect(() => {
+    verificarToken()
+  }, [verificarToken])
 
   const handleRespuestaChange = (preguntaId, valor) => {
     setRespuestas((prev) => ({
@@ -167,8 +166,11 @@ export default function EncuestaPublica({ token }) {
         case 4:
           respuesta.opciones_ids = valor
           break
+        default:
+          // Opcional: podrías hacer log o manejar el caso
+          console.warn(`Tipo de pregunta desconocido: ${pregunta.tipo_pregunta_id}`)
+          break
       }
-
       respuestasArray.push(respuesta)
     })
 
