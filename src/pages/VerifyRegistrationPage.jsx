@@ -8,7 +8,7 @@ const VerifyRegistrationPage = () => {
   const [message, setMessage] = useState('');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const hasVerified = useRef(false); // Esto asegura una sola ejecución
+  const hasVerified = useRef(false);
 
   const token = searchParams.get('token');
 
@@ -20,19 +20,24 @@ const VerifyRegistrationPage = () => {
     }
 
     if (hasVerified.current) {
-      return; // Si ya verificamos, no lo hacemos otra vez
+      return;
     }
 
-    hasVerified.current = true; // Marcamos que ya hicimos la verificación
+    hasVerified.current = true;
 
     const verify = async () => {
       try {
-        await verifyRegistrationRequest(token);
+        const response = await verifyRegistrationRequest(token);
         setStatus('success');
-        setMessage('¡Tu cuenta ha sido verificada correctamente! Redirigiendo...');
+        setMessage('¡Tu cuenta ha sido verificada y has iniciado sesión! Redirigiendo...');
+
+        if (response.access_token) {
+          localStorage.setItem('token', response.access_token);
+        }
+
         setTimeout(() => {
           navigate('/dashboard-suscriptor/plantillas');
-        }, 3000);
+        }, 2000);
       } catch (err) {
         console.error(err);
         setStatus('error');
