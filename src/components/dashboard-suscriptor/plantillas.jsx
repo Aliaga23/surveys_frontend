@@ -83,7 +83,7 @@ export default function Plantillas() {
               const opciones = await getOpciones(plantillaId, pregunta.id)
               return { ...pregunta, opciones }
             } catch (err) {
-              console.error("Error cargando opciones:", err)
+              console.error("Error cargando opcioness:", err)
               return { ...pregunta, opciones: [] }
             }
           }
