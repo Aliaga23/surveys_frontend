@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+
 import {
   getCampanas,
   createCampana,
@@ -16,7 +17,6 @@ export default function Campanas() {
   const [campanas, setCampanas] = useState([])
   const [filteredCampanas, setFilteredCampanas] = useState([])
   const [plantillas, setPlantillas] = useState([])
-  const [destinatarios, setDestinatarios] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
@@ -25,7 +25,6 @@ export default function Campanas() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [editingCampana, setEditingCampana] = useState(null)
   const [selectedCampana, setSelectedCampana] = useState(null)
-  const [campanaDetail, setCampanaDetail] = useState(null)
   const [formData, setFormData] = useState({
     nombre: "",
     plantilla_id: "",
@@ -48,35 +47,43 @@ export default function Campanas() {
     { id: 4, nombre: "Cerrada", color: "green", icon: "check" },
   ]
 
-  const getEstadosPermitidos = (estadoActual) => {
-    const transiciones = {
-      1: [2], // Borrador -> Programada
-      2: [3, 1], // Programada -> Enviada, Borrador
-      3: [4], // Enviada -> Cerrada
-      4: [], // Cerrada (estado final)
-    }
-    return transiciones[estadoActual] || [1, 2, 3, 4]
-  }
-
   useEffect(() => {
     loadData()
   }, [])
 
+  const filterCampanas = useCallback(() => {
+    let filtered = campanas
+
+    if (searchTerm) {
+      filtered = filtered.filter((campana) => 
+        campana.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((campana) => 
+        campana.estado_id.toString() === filterStatus
+      )
+    }
+
+    setFilteredCampanas(filtered)
+  }, [campanas, searchTerm, filterStatus])
+
+
   useEffect(() => {
     filterCampanas()
-  }, [campanas, searchTerm, filterStatus])
+  }, [campanas, searchTerm, filterStatus, filterCampanas])
 
   const loadData = async () => {
     try {
       setLoading(true)
-      const [campanasData, plantillasData, destinatariosData] = await Promise.all([
+      const [campanasData, plantillasData] = await Promise.all([
         getCampanas(),
         getPlantillas(),
         getDestinatarios(),
       ])
       setCampanas(campanasData)
       setPlantillas(plantillasData.filter((p) => p.activo))
-      setDestinatarios(destinatariosData)
     } catch (err) {
       setError("Error al cargar datos: " + err.message)
     } finally {
@@ -84,28 +91,17 @@ export default function Campanas() {
     }
   }
 
-  const filterCampanas = () => {
-    let filtered = campanas
 
-    if (searchTerm) {
-      filtered = filtered.filter((campana) => campana.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
-    }
-
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((campana) => campana.estado_id.toString() === filterStatus)
-    }
-
-    setFilteredCampanas(filtered)
-  }
 
   const loadCampanaDetail = async (id) => {
     try {
       const detail = await getCampanaFullDetail(id)
-      setCampanaDetail(detail)
+      setSelectedCampana(detail)  // Actualiza directamente el seleccionado con el detalle completo
     } catch (err) {
       setError("Error al cargar detalle: " + err.message)
     }
   }
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -671,7 +667,6 @@ export default function Campanas() {
                     onClick={() => {
                       setShowDetailModal(false)
                       setSelectedCampana(null)
-                      setCampanaDetail(null)
                     }}
                     className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-white transition-colors"
                   >
