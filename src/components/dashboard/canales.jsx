@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, Radio, Mail, MessageSquare, Smartphone, Globe, MoreHorizontal } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
+import { actualizarCanal, crearCanal, eliminarCanal, listarCanales } from "../../services/api-admin"
 
 const CanalesPage = () => {
   const [canales, setCanales] = useState([
@@ -66,6 +67,31 @@ const CanalesPage = () => {
     },
   ])
 
+  useEffect(() => {
+    async function fetchCanales() {
+      try {
+        const data = await listarCanales()
+
+        const dataConValoresPorDefecto = data.map((canal) => ({
+          ...canal,
+          tipo: canal.tipo || "email",
+          descripcion: canal.descripcion || "Canal de distribución",
+          configuracion: canal.configuracion || {},
+          estado: canal.estado || "activo",
+          encuestasEnviadas: canal.encuestasEnviadas ?? 0,
+          tasaRespuesta: canal.tasaRespuesta ?? 0,
+          fechaCreacion: canal.fechaCreacion || new Date().toISOString(),
+        }))
+
+        setCanales(dataConValoresPorDefecto)
+      } catch (error) {
+        console.error("Error al cargar canales:", error)
+      }
+    }
+
+    fetchCanales()
+  }, [])
+  console.log('Canales', canales)
   const [showModal, setShowModal] = useState(false)
   const [editingCanal, setEditingCanal] = useState(null)
 
@@ -104,9 +130,28 @@ const CanalesPage = () => {
     setShowModal(true)
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar este canal?")) {
-      setCanales(canales.filter((canal) => canal.id !== id))
+      try {
+        await eliminarCanal(id)
+
+        const actualizados = await listarCanales()
+        const normalizados = actualizados.map((c) => ({
+          ...c,
+          tipo: c.tipo || "email",
+          descripcion: c.descripcion || "Canal de distribución",
+          configuracion: c.configuracion || {},
+          estado: c.estado || "activo",
+          encuestasEnviadas: c.encuestasEnviadas ?? 0,
+          tasaRespuesta: c.tasaRespuesta ?? 0,
+          fechaCreacion: c.fechaCreacion || new Date().toISOString(),
+        }))
+
+        setCanales(normalizados)
+      } catch (error) {
+        console.error("Error al eliminar canal:", error)
+        alert("No se pudo eliminar el canal.")
+      }
     }
   }
 
@@ -255,7 +300,50 @@ const CanalesPage = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {editingCanal ? "Editar Canal" : "Nuevo Canal"}
               </h3>
-              <form className="space-y-4">
+              <form 
+                className="space-y-4"
+                onSubmit={async (e) => {
+                  e.preventDefault()
+                  const form = e.target
+                  const nombre = form[0].value
+                  const tipo = form[1].value
+                  const descripcion = form[2].value
+
+                  const nuevoCanal = {
+                    nombre,
+                    tipo,
+                    descripcion,
+                    activo: true,
+                  }
+
+                  try {
+                    if (editingCanal) {
+                      await actualizarCanal(editingCanal.id, nuevoCanal)
+                    } else {
+                      await crearCanal(nuevoCanal)
+                    }
+
+                    const actualizados = await listarCanales()
+                    const normalizados = actualizados.map((c) => ({
+                      ...c,
+                      tipo: c.tipo || "email",
+                      descripcion: c.descripcion || "Canal de distribución",
+                      configuracion: c.configuracion || {},
+                      estado: c.estado || "activo",
+                      encuestasEnviadas: c.encuestasEnviadas ?? 0,
+                      tasaRespuesta: c.tasaRespuesta ?? 0,
+                      fechaCreacion: c.fechaCreacion || new Date().toISOString(),
+                    }))
+
+                    setCanales(normalizados)
+                    setShowModal(false)
+                    setEditingCanal(null)
+                  } catch (error) {
+                    console.error("Error al guardar canal:", error)
+                    alert("No se pudo guardar el canal.")
+                  }
+                }}
+              >
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Canal</label>
                   <input

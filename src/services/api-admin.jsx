@@ -104,3 +104,22 @@ export const eliminarTipoPregunta = (id) =>
   authFetch(`/catalogos/tipos-pregunta/${id}`, {
     method: "DELETE",
   })
+
+export const listarCanales = () => authFetch("/catalogos/canales")
+
+export const crearCanal = (canalData) =>
+  authFetch("/catalogos/canales", {
+    method: "POST",
+    body: JSON.stringify(canalData),
+  })
+
+export const actualizarCanal = (id, canalData) =>
+  authFetch(`/catalogos/canales/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(canalData),
+  })
+
+export const eliminarCanal = (id) =>
+  authFetch(`/catalogos/canales/${id}`, {
+    method: "DELETE",
+  })
