@@ -3,7 +3,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, Edit, Trash2, MoreHorizontal } from "lucide-react"
+import { Plus, Edit, Trash2, MoreHorizontal,   Star,
+  MessageSquare,
+  FileText,
+  CheckSquare, } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
 import { listarRoles, crearRol, actualizarRol, eliminarRol } from "../../services/api-admin"
 
@@ -102,6 +105,64 @@ const RolesPage = () => {
             </button>
           </div>
         </div>
+        
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <MessageSquare className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Tipos</p>
+                <p className="text-2xl font-bold text-gray-900">{roles.length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckSquare className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Usos Activos</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {roles.reduce((sum, tipo) => sum + (tipo.usosActivos ?? 0), 0)}
+
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Star className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Más Usado</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {Math.max(...roles.map((t) => t.usosActivos ?? 0))}
+
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <FileText className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Categorías</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {new Set(roles.map((t) => t.categoria || 'Sin categoría')).size}
+
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
 
         {/* Tabla */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

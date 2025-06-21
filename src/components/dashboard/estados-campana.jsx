@@ -10,7 +10,11 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Target
+  Target,
+  CheckSquare,
+  Star,
+  MessageSquare,
+  FileText,
 } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
 import {
@@ -115,6 +119,63 @@ const EstadosCampanaPage = () => {
               <Plus className="h-4 w-4" />
               <span>Nuevo Estado</span>
             </button>
+          </div>
+        </div>
+
+          {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <MessageSquare className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Tipos</p>
+                <p className="text-2xl font-bold text-gray-900">{estados.length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckSquare className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Usos Activos</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {estados.reduce((sum, tipo) => sum + (tipo.usosActivos ?? 0), 0)}
+
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Star className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Más Usado</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {Math.max(...estados.map((t) => t.usosActivos ?? 0))}
+
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="flex items-center">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <FileText className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Categorías</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {new Set(estados.map((t) => t.categoria || 'Sin categoría')).size}
+
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
