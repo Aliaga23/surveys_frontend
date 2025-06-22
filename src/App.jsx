@@ -16,12 +16,17 @@ import Planes from './components/dashboard/planes';
 import PlantillasPage from './components/dashboard-suscriptor/plantillas';
 import CampanasPage from './components/dashboard-suscriptor/campanas';
 import DestinatariosPage from './components/dashboard-suscriptor/destinatarios';
-import EncuestaPage from './pages/EncuestaPage';
 import EntregasPage from './components/dashboard-suscriptor/entregas';
 import RespuestasPage from './components/dashboard-suscriptor/respuestas';
-import PrivateRoute from './components/PrivateRoute';
+import ConfiguracionPage from './components/dashboard-suscriptor/configuracion';  // Nuevo
+import PlanesSuscriptorPage from './components/dashboard-suscriptor/planes';      // Nuevo
+import EncuestaPage from './pages/EncuestaPage';
 import EmailSentPage from './pages/EmailSentPage';
-import VerifyRegistrationPage from './pages/VerifyRegistrationPage'; // Lo crearás luego
+import VerifyRegistrationPage from './pages/VerifyRegistrationPage';
+import CancelPage from './components/dashboard-suscriptor/cancel'; // Nueva página de cancelación
+import SuccessPage from './components/dashboard-suscriptor/success'; // Nueva página de éxito
+import PrivateRoute from './components/PrivateRoute';
+
 function App() {
   return (
     <Router>
@@ -33,6 +38,13 @@ function App() {
         <Route path="/encuestas/:token" element={<EncuestaPage />} />
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
+        
+        {/* Ruta pública para cancelación */}
+        <Route path="/dashboard-suscriptor/planes/cancel" element={<CancelPage />} /> {/* Ruta para la página de cancelación */}
+        
+        {/* Ruta pública para éxito */}
+        <Route path="/dashboard-suscriptor/planes/success" element={<SuccessPage />} /> {/* Ruta para la página de éxito */}
+
         {/* Rutas protegidas - admin */}
         <Route path="/dashboard/roles" element={
           <PrivateRoute requiredType="admin"><Roles /></PrivateRoute>
@@ -77,6 +89,12 @@ function App() {
         } />
         <Route path="/dashboard-suscriptor/respuestas" element={
           <PrivateRoute requiredType="suscriptor"><RespuestasPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/configuracion" element={
+          <PrivateRoute requiredType="suscriptor"><ConfiguracionPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/planes" element={
+          <PrivateRoute requiredType="suscriptor"><PlanesSuscriptorPage /></PrivateRoute>
         } />
 
         <Route path="*" element={<Navigate to="/" replace />} />
