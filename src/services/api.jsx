@@ -122,3 +122,27 @@ export const getRespuestas = (campanId = null) => {
   const endpoint = campanId ? `/respuestas?campana_id=${campanId}` : "/respuestas"
   return authFetch(endpoint)
 }
+
+
+// Planes
+export const listPlanes = () => authFetch("/subscription/planes");
+
+export const getPlan = (id) => authFetch(`/subscription/planes/${id}`);
+
+export const createPlan = (data) =>
+  authFetch("/subscription/planes", { method: "POST", body: JSON.stringify(data) });
+
+export const updatePlan = (id, data) =>
+  authFetch(`/subscription/planes/${id}`, { method: "PUT", body: JSON.stringify(data) });
+
+export const deletePlan = (id) =>
+  authFetch(`/subscription/planes/${id}`, { method: "DELETE" });
+
+// Suscripciones
+export const iniciarStripeCheckout = (suscriptorId, planId) =>
+  authFetch(`/subscription/stripe-checkout?suscriptor_id=${suscriptorId}&plan_id=${planId}`, {
+    method: "POST",
+  });
+
+// Auth
+export const getMe = () => authFetch("/auth/me");
