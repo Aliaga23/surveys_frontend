@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   BarChart3,
   Users,
@@ -17,6 +17,7 @@ import {
   DollarSign,
   Crown,
 } from "lucide-react"
+import { Link } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -29,14 +30,33 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "./sidebar"
+import { logout, getCurrentUser } from "../services/auth"
 
 const DashboardLayout = ({ children, activeSection = "roles" }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [user] = useState({
-    name: "Admin Usuario",
+  const [user, setUser] = useState({
+    name: "Usuario Administrador",
     email: "admin@surveysaas.com",
     avatar: "/placeholder.svg?height=32&width=32",
+    plan: "Administrador",
   })
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userData = await getCurrentUser()
+        setUser({
+          name: userData.nombre || "Usuario Administrador",
+          email: userData.email || "usuario@empresa.com",
+          avatar: "/placeholder.svg?height=32&width=32",
+          plan: "Administrador",
+        })
+      } catch (error) {
+        console.error("Error loading user:", error)
+      }
+    }
+    loadUser()
+  }, [])
 
   const menuItems = [
     {
@@ -127,6 +147,9 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
   ]
 
   const closeSidebar = () => setSidebarOpen(false)
+  const handleLogout = () => {
+    logout()
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -163,16 +186,13 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
-            <img src={user.avatar || "/placeholder.svg"} alt={user.name} className="w-8 h-8 rounded-full bg-gray-300" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-            </div>
-            <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => handleLogout()}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-semibold">Cerrar sesión</span>
+          </button>
         </SidebarFooter>
       </Sidebar>
 
@@ -188,7 +208,7 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder="Buscar plantillas, campañas..."
                   className="pl-10 pr-4 py-2 w-48 lg:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -202,14 +222,19 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
-              <div className="flex items-center space-x-2">
+              <Link
+                to="/dashboard/perfil-admin"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
                 <img
                   src={user.avatar || "/placeholder.svg"}
                   alt={user.name}
                   className="w-8 h-8 rounded-full bg-gray-300"
                 />
                 <span className="text-sm font-medium text-gray-700 hidden sm:block">{user.name}</span>
-              </div>
+              </Link>
+
+
             </div>
           </div>
         </header>

@@ -15,7 +15,7 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "../sidebar"
-
+import { Link } from "react-router-dom"
 const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState({
@@ -143,17 +143,13 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
-            <img src={user.avatar || "/placeholder.svg"} alt={user.name} className="w-8 h-8 rounded-full bg-gray-300" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-              <p className="text-xs text-blue-600 font-medium">{user.plan}</p>
-            </div>
-            <button onClick={handleLogout} className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => handleLogout()}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-semibold">Cerrar sesión</span>
+          </button>
         </SidebarFooter>
       </Sidebar>
 
@@ -183,14 +179,17 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
-              <div className="flex items-center space-x-2">
+              <Link
+                to="/dashboard-suscriptor/perfil-suscriptor"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
                 <img
                   src={user.avatar || "/placeholder.svg"}
                   alt={user.name}
                   className="w-8 h-8 rounded-full bg-gray-300"
                 />
                 <span className="text-sm font-medium text-gray-700 hidden sm:block">{user.name}</span>
-              </div>
+              </Link>
             </div>
           </div>
         </header>
