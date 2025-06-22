@@ -32,6 +32,7 @@ import {
 } from "./sidebar"
 import { useAuth } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
+import { getCurrentUser } from "../services/auth"
 const DashboardLayout = ({ children, activeSection = "roles" }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [user, setUser] = useState({
@@ -188,19 +189,13 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
-            <img src={user.avatar || "/placeholder.svg"} alt={user.name} className="w-8 h-8 rounded-full bg-gray-300" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => handleLogout()}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-semibold">Cerrar sesión</span>
+          </button>
         </SidebarFooter>
       </Sidebar>
 

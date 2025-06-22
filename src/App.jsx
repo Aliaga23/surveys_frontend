@@ -13,6 +13,8 @@ import TiposPregunta from './components/dashboard/tipos-pregunta';
 import MetodoPago from './components/dashboard/metodos-pago';
 import EstadosCampaña from './components/dashboard/estados-campana';
 import Planes from './components/dashboard/planes';
+import PerfilAdmin from './components/dashboard/perfil-admin';
+import PerfilSuscriptor from './components/dashboard-suscriptor/perfil-suscriptor';
 import PlantillasPage from './components/dashboard-suscriptor/plantillas';
 import CampanasPage from './components/dashboard-suscriptor/campanas';
 import DestinatariosPage from './components/dashboard-suscriptor/destinatarios';
@@ -73,6 +75,9 @@ function App() {
         <Route path="/dashboard/planes" element={
           <PrivateRoute requiredType="admin"><Planes /></PrivateRoute>
         } />
+        <Route path="/dashboard/perfil-admin" element={
+          <PrivateRoute requiredType="admin"><PerfilAdmin /></PrivateRoute>
+        } />
 
         {/* Rutas protegidas - suscriptor */}
         <Route path="/dashboard-suscriptor/plantillas" element={
@@ -95,6 +100,9 @@ function App() {
         } />
         <Route path="/dashboard-suscriptor/planes" element={
           <PrivateRoute requiredType="suscriptor"><PlanesSuscriptorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/perfil-suscriptor" element={
+          <PrivateRoute requiredType="suscriptor"><PerfilSuscriptor /></PrivateRoute>
         } />
 
         <Route path="*" element={<Navigate to="/" replace />} />
