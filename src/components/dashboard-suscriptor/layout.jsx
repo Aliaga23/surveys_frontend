@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState, useEffect } from "react"
 import { BarChart3, FileText, Target, MessageSquare, Users, Settings, LogOut, Bell, Search } from "lucide-react"

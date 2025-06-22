@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState, useEffect } from "react"
 import { Eye, EyeOff, Lock, ArrowLeft, ArrowRight, BarChart3, Menu, X, CheckCircle } from "lucide-react"

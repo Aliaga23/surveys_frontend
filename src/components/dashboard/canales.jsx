@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, Radio, Mail, MessageSquare, Smartphone, Globe, MoreHorizontal } from "lucide-react"

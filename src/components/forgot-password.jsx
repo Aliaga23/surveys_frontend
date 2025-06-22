@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useState } from "react"
 import { Mail, ArrowLeft, ArrowRight, BarChart3, Menu, X, CheckCircle } from "lucide-react"

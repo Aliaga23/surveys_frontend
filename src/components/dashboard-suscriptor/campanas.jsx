@@ -1,4 +1,3 @@
-"use client"
 
 import { useState, useEffect, useCallback } from "react"
 
@@ -35,9 +34,10 @@ export default function Campanas() {
   // Catálogos hardcodeados según la API
   const canales = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
-    { id: 2, nombre: "SMS", color: "green", icon: "message" },
-    { id: 3, nombre: "WhatsApp", color: "emerald", icon: "phone" },
-    { id: 4, nombre: "Web", color: "purple", icon: "globe" },
+    { id: 2, nombre: "WhatsApp", color: "green", icon: "message" },
+    { id: 3, nombre: "Llamada", color: "emerald", icon: "phone" },
+    { id: 4, nombre: "Papel", color: "purple", icon: "globe" },
+
   ]
 
   const estados = [

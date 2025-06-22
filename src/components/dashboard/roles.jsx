@@ -1,6 +1,6 @@
 // Roles.jsx - Versión final funcional y estéticamente cuidada
 
-"use client"
+
 
 import { useEffect, useState } from "react"
 import { Plus, Edit, Trash2, MoreHorizontal,   Star,

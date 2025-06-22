@@ -96,7 +96,7 @@ export const updateCampana = (id, data) => {
 export const deleteCampana = (id) => authFetch(`/campanas/${id}`, { method: "DELETE" })
 
 // Entregas
-export const getEntregasByCampana = (campanaId, skip = 0, limit = 100) =>
+export const getEntregasByCampana = (campanaId, skip = 0, limit = 1000) =>
   authFetch(`/campanas/${campanaId}/entregas?skip=${skip}&limit=${limit}`)
 
 export const createEntrega = (campanaId, data) =>

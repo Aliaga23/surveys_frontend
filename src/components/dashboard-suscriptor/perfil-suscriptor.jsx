@@ -1,6 +1,6 @@
 // src/components/dashboard-suscriptor/perfil-admin.jsx
 
-"use client"
+
 
 import { useEffect, useState } from "react"
 import {
