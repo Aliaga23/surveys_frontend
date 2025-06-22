@@ -1,7 +1,5 @@
 // src/services/api-admin.js
-
-// const API_BASE_URL = "https://surveysbackend-production.up.railway.app"
-const API_BASE_URL = "http://localhost:8000"
+const API_BASE_URL = "https://surveysbackend-production.up.railway.app"
 
 const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token")

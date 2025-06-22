@@ -1,5 +1,4 @@
-// const API_URL = "https://surveysbackend-production.up.railway.app"
-const API_URL = "http://localhost:8000"
+const API_URL = "https://surveysbackend-production.up.railway.app"
 
 export async function registerSuscriptor(userData) {
   try {
