@@ -9,6 +9,8 @@ import {
   markEntregaAsSent,
   markEntregaAsResponded,
   getDestinatarios,
+  createBulkEntregas,
+  downloadFormularioPdf,
 } from "../../services/api"
 import DashboardSuscriptorLayout from "./layout"
 
@@ -26,15 +28,34 @@ export default function Entregas() {
   const [selectedEntrega, setSelectedEntrega] = useState(null)
   const [formData, setFormData] = useState({
     campana_id: "",
-    destinatario_ids: [], // Changed from destinatario_id to array
+    destinatario_ids: [],
     canal_id: "",
   })
 
-  // Catálogos
+  // Estados para entregas por papel
+  const [showPaperModal, setShowPaperModal] = useState(false)
+  const [showPrintModal, setShowPrintModal] = useState(false)
+  const [paperFormData, setPaperFormData] = useState({
+    campana_id: "",
+    cantidad: 1,
+  })
+  const [printFormData, setPrintFormData] = useState({
+    campana_id: "",
+  })
+
+  // Catálogos (sin papel para entregas normales)
   const canales = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
     { id: 2, nombre: "WhatsApp", color: "green", icon: "message-circle" },
     { id: 3, nombre: "Vapi", color: "purple", icon: "phone" },
+  ]
+
+  // Catálogo completo para mostrar entregas existentes
+  const canalesCompleto = [
+    { id: 1, nombre: "Email", color: "blue", icon: "mail" },
+    { id: 2, nombre: "WhatsApp", color: "green", icon: "message-circle" },
+    { id: 3, nombre: "Vapi", color: "purple", icon: "phone" },
+    { id: 4, nombre: "Papel", color: "orange", icon: "file-text" },
   ]
 
   const estados = [
@@ -44,28 +65,18 @@ export default function Entregas() {
     { id: 4, nombre: "Fallido", color: "red", icon: "x-circle" },
   ]
 
-const canalCard = {
-  blue:   "border-blue-500 bg-blue-50",
-  green:  "border-green-500 bg-green-50",
-  purple: "border-purple-500 bg-purple-50",
-};
 
-const canalGradient = {
-  blue:   "from-blue-500 to-blue-600",
-  green:  "from-green-500 to-green-600",
-  purple: "from-purple-500 to-purple-600",
-};
 
-const canalTick = {
-  blue:   "bg-blue-500",
-  green:  "bg-green-500",
-  purple: "bg-purple-500",
-};
+  const canalGradient = {
+    blue: "from-blue-500 to-blue-600",
+    green: "from-green-500 to-green-600",
+    purple: "from-purple-500 to-purple-600",
+    orange: "from-orange-500 to-orange-600",
+  }
+
+
   const [expandedCards, setExpandedCards] = useState(new Set())
-
   const [showCampanaSelector, setShowCampanaSelector] = useState(false)
-  const [, setShowDestinatarioSelector] = useState(false)
-  const [, setShowCanalSelector] = useState(false)
   const [searchCampana, setSearchCampana] = useState("")
   const [searchDestinatario, setSearchDestinatario] = useState("")
 
@@ -129,8 +140,6 @@ const canalTick = {
       canal_id: "",
     })
     setShowCampanaSelector(false)
-    setShowDestinatarioSelector(false)
-    setShowCanalSelector(false)
     setSearchCampana("")
     setSearchDestinatario("")
   }
@@ -189,13 +198,14 @@ const canalTick = {
   }
 
   const getCanalColor = (id) => {
-    const canal = canales.find((c) => c.id === id)
+    const canal = canalesCompleto.find((c) => c.id === id)
     if (!canal) return "bg-gray-100 text-gray-700 border-gray-200"
 
     const colorMap = {
       blue: "bg-blue-100 text-blue-700 border-blue-200",
       green: "bg-green-100 text-green-700 border-green-200",
       purple: "bg-purple-100 text-purple-700 border-purple-200",
+      orange: "bg-orange-100 text-orange-700 border-orange-200",
     }
 
     return colorMap[canal.color] || "bg-gray-100 text-gray-700 border-gray-200"
@@ -260,6 +270,110 @@ const canalTick = {
     return filtered
   }
 
+  // Funciones para entregas por papel
+  const handlePaperSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const result = await createBulkEntregas(paperFormData.campana_id, paperFormData.cantidad)
+      setShowPaperModal(false)
+      setPaperFormData({ campana_id: "", cantidad: 1 })
+      setError("")
+      loadData()
+      alert(`Se crearon ${result.length} entregas por papel (Canal 4) exitosamente`)
+    } catch (err) {
+      setError("Error al crear entregas por papel: " + err.message)
+    }
+  }
+
+  // Nueva función para descargar PDF individual
+  const handleDownloadPdf = async (campanaId) => {
+    try {
+      const blob = await downloadFormularioPdf(campanaId)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.style.display = "none"
+      a.href = url
+      a.download = `formulario-${campanaId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+    } catch (err) {
+      setError("Error al descargar formulario: " + err.message)
+    }
+  }
+
+ 
+
+  // Obtener campañas que tienen entregas de papel
+  const paperCampanas = campanas.filter((campana) => {
+    const campanEntregas = entregas[campana.id] || []
+    return campanEntregas.some((entrega) => entrega.canal_id === 4)
+  })
+
+  // Filtrar campañas para nueva entrega (excluir las que solo tienen canal 4)
+  const availableCampanasForNewEntrega = campanas.filter((campana) => {
+    // Si la campaña tiene canal_id definido y es 4, no mostrarla
+    if (campana.canal_id === 4) return false
+
+    // Si no tiene canal_id definido, verificar si todas sus entregas son de canal 4
+    const campanEntregas = entregas[campana.id] || []
+    if (campanEntregas.length > 0) {
+      const allPaperDeliveries = campanEntregas.every((entrega) => entrega.canal_id === 4)
+      return !allPaperDeliveries
+    }
+
+    // Si no tiene entregas, permitir mostrarla
+    return true
+  })
+
+  // Función para auto-seleccionar canal basado en la campaña
+  const handleCampanaSelection = (campanaId) => {
+    const campana = campanas.find((c) => c.id === campanaId)
+    if (campana) {
+      // Si la campaña tiene un canal definido, usarlo
+      if (campana.canal_id && campana.canal_id !== 4) {
+        setFormData({
+          ...formData,
+          campana_id: campanaId,
+          canal_id: campana.canal_id.toString(),
+        })
+      } else {
+        // Si no tiene canal definido, verificar las entregas existentes
+        const campanEntregas = entregas[campanaId] || []
+        if (campanEntregas.length > 0) {
+          // Usar el canal más común (que no sea papel)
+          const canalCounts = {}
+          campanEntregas.forEach((entrega) => {
+            if (entrega.canal_id !== 4) {
+              canalCounts[entrega.canal_id] = (canalCounts[entrega.canal_id] || 0) + 1
+            }
+          })
+
+          const mostCommonCanal = Object.keys(canalCounts).reduce(
+            (a, b) => (canalCounts[a] > canalCounts[b] ? a : b),
+            "1",
+          )
+
+          setFormData({
+            ...formData,
+            campana_id: campanaId,
+            canal_id: mostCommonCanal,
+          })
+        } else {
+          // Si no hay entregas, dejar sin canal seleccionado
+          setFormData({
+            ...formData,
+            campana_id: campanaId,
+            canal_id: "",
+          })
+        }
+      }
+    }
+    setShowCampanaSelector(false)
+    setSearchCampana("")
+  }
+
   const stats = getStats()
   const filteredEntregas = getFilteredEntregas()
 
@@ -298,6 +412,9 @@ const canalTick = {
     }
     setExpandedCards(newExpanded)
   }
+
+  // Filtrar campañas para entregas por papel
+  const availableCampanasForPaper = campanas.filter((campana) => campana.canal_id === 4)
 
   return (
     <DashboardSuscriptorLayout activeSection="entregas">
@@ -485,8 +602,8 @@ const canalTick = {
               </div>
             </div>
 
-            {/* Botón nueva entrega */}
-            <div className="flex justify-end">
+            {/* Botones de acción */}
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(true)}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
@@ -496,6 +613,40 @@ const canalTick = {
                 </svg>
                 <span className="hidden sm:inline">Nueva Entrega</span>
                 <span className="sm:hidden">Nueva</span>
+              </button>
+
+              {/* Botón entregas por papel */}
+              <button
+                onClick={() => setShowPaperModal(true)}
+                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Entregas por Papel</span>
+                <span className="sm:hidden">Papel</span>
+              </button>
+
+              {/* Botón gestión de impresión */}
+              <button
+                onClick={() => setShowPrintModal(true)}
+                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Gestión de Impresión</span>
+                <span className="sm:hidden">Imprimir</span>
               </button>
             </div>
           </div>
@@ -636,7 +787,7 @@ const canalTick = {
                                   <span
                                     className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full border ${getCanalColor(entrega.canal_id)}`}
                                   >
-                                    {getNombrePorId(canales, entrega.canal_id)}
+                                    {getNombrePorId(canalesCompleto, entrega.canal_id)}
                                   </span>
                                   <span
                                     className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full border ${getEstadoColor(entrega.estado_id)}`}
@@ -760,7 +911,7 @@ const canalTick = {
           </div>
         )}
 
-        {/* Modal Nueva Entrega */}
+        {/* Modal Nueva Entrega (con auto-selección de canal) */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 animate-fade-in">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden transform transition-all animate-scale-in">
@@ -774,7 +925,7 @@ const canalTick = {
                   Nueva Entrega Masiva
                 </h3>
                 <p className="text-sm text-gray-600 mt-2">
-                  Selecciona una campaña, múltiples destinatarios y el canal de envío
+                  Selecciona una campaña y múltiples destinatarios. El canal se selecciona automáticamente.
                 </p>
               </div>
 
@@ -814,6 +965,65 @@ const canalTick = {
                                   {campanas.find((c) => c.id === formData.campana_id)?.nombre}
                                 </p>
                                 <p className="text-sm text-gray-500">ID: {formData.campana_id.slice(0, 8)}...</p>
+                                {formData.canal_id && (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div
+                                      className={`w-5 h-5 bg-gradient-to-br ${canalGradient[canales.find((c) => c.id === Number.parseInt(formData.canal_id))?.color]} rounded flex items-center justify-center`}
+                                    >
+                                      {canales.find((c) => c.id === Number.parseInt(formData.canal_id))?.icon ===
+                                        "mail" && (
+                                        <svg
+                                          className="w-3 h-3 text-white"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                          />
+                                        </svg>
+                                      )}
+                                      {canales.find((c) => c.id === Number.parseInt(formData.canal_id))?.icon ===
+                                        "message-circle" && (
+                                        <svg
+                                          className="w-3 h-3 text-white"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                          />
+                                        </svg>
+                                      )}
+                                      {canales.find((c) => c.id === Number.parseInt(formData.canal_id))?.icon ===
+                                        "phone" && (
+                                        <svg
+                                          className="w-3 h-3 text-white"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                          />
+                                        </svg>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-blue-600">
+                                      Canal: {getNombrePorId(canales, Number.parseInt(formData.canal_id))}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -853,17 +1063,13 @@ const canalTick = {
                               />
                             </div>
                             <div className="max-h-48 overflow-y-auto">
-                              {campanas
+                              {availableCampanasForNewEntrega
                                 .filter((campana) => campana.nombre.toLowerCase().includes(searchCampana.toLowerCase()))
                                 .map((campana) => (
                                   <button
                                     key={campana.id}
                                     type="button"
-                                    onClick={() => {
-                                      setFormData({ ...formData, campana_id: campana.id })
-                                      setShowCampanaSelector(false)
-                                      setSearchCampana("")
-                                    }}
+                                    onClick={() => handleCampanaSelection(campana.id)}
                                     className="w-full p-3 hover:bg-gray-50 flex items-center gap-3 text-left transition-colors"
                                   >
                                     <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -884,6 +1090,11 @@ const canalTick = {
                                     <div className="flex-1 min-w-0">
                                       <p className="font-medium text-gray-900 truncate">{campana.nombre}</p>
                                       <p className="text-xs text-gray-500 font-mono">ID: {campana.id.slice(0, 8)}...</p>
+                                      {campana.canal_id && (
+                                        <p className="text-xs text-blue-600">
+                                          Canal: {getNombrePorId(canales, campana.canal_id)}
+                                        </p>
+                                      )}
                                     </div>
                                   </button>
                                 ))}
@@ -1315,83 +1526,107 @@ const canalTick = {
                       )}
                     </div>
 
-                    {/* Selección de Canal */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        Canal de Envío <span className="text-red-500">*</span>
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {canales.map((canal) => {
-                          const isSelected = formData.canal_id === canal.id.toString()
-                         
+                    {/* Canal seleccionado automáticamente */}
+                    {formData.canal_id && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">
+                          Canal de Envío (Seleccionado automáticamente)
+                        </label>
+                        {(() => {
+                          const selectedCanal = canales.find((c) => c.id === Number.parseInt(formData.canal_id))
+                          if (!selectedCanal) return null
+
+                          const colorClasses = {
+                            blue: "from-blue-50 to-blue-100 border-blue-200",
+                            green: "from-green-50 to-green-100 border-green-200",
+                            purple: "from-purple-50 to-purple-100 border-purple-200",
+                          }
+
+                          const iconClasses = {
+                            blue: "bg-blue-500",
+                            green: "bg-green-500",
+                            purple: "bg-purple-500",
+                          }
 
                           return (
-                            <button
-  key={canal.id}
-  type="button"
-  onClick={() =>
-    setFormData({ ...formData, canal_id: canal.id.toString() })
-  }
-  className={`p-4 rounded-xl border-2 transition-all text-left ${
-    isSelected
-      ? `${canalCard[canal.color]} shadow-lg transform scale-105`
-      : "border-gray-200 hover:border-gray-300 hover:shadow-md"
-  }`}
->
-  <div className="flex items-center gap-3">
-    {/* icono + degradado */}
-    <div
-      className={`w-12 h-12 bg-gradient-to-br ${canalGradient[canal.color]} rounded-xl flex items-center justify-center`}
-    >
-      {canal.icon === "mail" && (
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      )}
-      {canal.icon === "message-circle" && (
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      )}
-      {canal.icon === "phone" && (
-        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-        </svg>
-      )}
-    </div>
-
-    {/* texto */}
-    <div>
-      <p className="font-semibold text-gray-900">{canal.nombre}</p>
-      <p className="text-sm text-gray-500">
-        {canal.nombre === "Email" && "Envío por correo electrónico"}
-        {canal.nombre === "WhatsApp" && "Envío por WhatsApp"}
-        {canal.nombre === "Vapi" && "Envío por llamada de voz"}
-      </p>
-    </div>
-
-    {/* ✔ cuando está seleccionado */}
-    {isSelected && (
-      <div className="ml-auto">
-        <div
-          className={`w-6 h-6 ${canalTick[canal.color]} rounded-full flex items-center justify-center`}
-        >
-          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      </div>
-    )}
-  </div>
-</button>
-
+                            <div
+                              className={`p-4 bg-gradient-to-r ${colorClasses[selectedCanal.color]} border rounded-xl`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`w-10 h-10 ${iconClasses[selectedCanal.color]} rounded-xl flex items-center justify-center`}
+                                >
+                                  {selectedCanal.icon === "mail" && (
+                                    <svg
+                                      className="w-5 h-5 text-white"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {selectedCanal.icon === "message-circle" && (
+                                    <svg
+                                      className="w-5 h-5 text-white"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                      />
+                                    </svg>
+                                  )}
+                                  {selectedCanal.icon === "phone" && (
+                                    <svg
+                                      className="w-5 h-5 text-white"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                      />
+                                    </svg>
+                                  )}
+                                  <svg
+                                    className="w-3 h-3 text-white absolute top-1 right-1"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M5 13l4 4L19 7"
+                                    />
+                                  </svg>
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-gray-900 text-lg">{selectedCanal.nombre}</p>
+                                  <p className="text-sm text-gray-600">
+                                    Canal seleccionado automáticamente basado en la campaña
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           )
-                        })}
+                        })()}
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
@@ -1415,6 +1650,211 @@ const canalTick = {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Entregas por Papel */}
+        {showPaperModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-hidden transform transition-all animate-scale-in">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-t-2xl">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  Crear Entregas por Papel
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">Genera entregas en papel para distribución física</p>
+              </div>
+
+              <div className="p-6">
+                <form onSubmit={handlePaperSubmit}>
+                  <div className="space-y-6">
+                    {/* Selección de Campaña */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Campaña <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={paperFormData.campana_id}
+                        onChange={(e) => setPaperFormData({ ...paperFormData, campana_id: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
+                        required
+                      >
+                        <option value="">Seleccionar campaña</option>
+                        {availableCampanasForPaper.map((campana) => (
+                          <option key={campana.id} value={campana.id}>
+                            {campana.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Cantidad */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Cantidad de Entregas <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={paperFormData.cantidad}
+                        onChange={(e) =>
+                          setPaperFormData({ ...paperFormData, cantidad: Number.parseInt(e.target.value) || 1 })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Máximo 1000 entregas por lote</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPaperModal(false)
+                        setPaperFormData({ campana_id: "", cantidad: 1 })
+                      }}
+                      className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!paperFormData.campana_id || paperFormData.cantidad < 1}
+                      className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all shadow-lg font-medium transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      Crear {paperFormData.cantidad} Entrega{paperFormData.cantidad > 1 ? "s" : ""}
+                    </button>
+                  </div>
+                </form>
+
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200 mt-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-semibold text-orange-800 mb-1">
+                        Información sobre Entregas por Papel
+                      </h5>
+                      <p className="text-xs text-orange-700">
+                        Las entregas por papel se crean automáticamente con <strong>Canal 4 (Papel)</strong>. No
+                        requieren destinatarios específicos ya que son para distribución física.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Gestión de Impresión (Simplificado) */}
+        {showPrintModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-hidden transform transition-all animate-scale-in">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-t-2xl">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  Descargar Formularios
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  Descarga formularios PDF de campañas con entregas por papel
+                </p>
+              </div>
+
+              <div className="p-6">
+                <div className="space-y-6">
+                  {/* Selección de Campaña */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Seleccionar Campaña con Entregas por Papel
+                    </label>
+                    <select
+                      value={printFormData.campana_id}
+                      onChange={(e) => setPrintFormData({ ...printFormData, campana_id: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
+                    >
+                      <option value="">Seleccionar campaña</option>
+                      {paperCampanas.map((campana) => (
+                        <option key={campana.id} value={campana.id}>
+                          {campana.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Acción de descarga */}
+                  {printFormData.campana_id && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        Descargar Formulario PDF
+                      </h4>
+                      <button
+                        onClick={() => handleDownloadPdf(printFormData.campana_id)}
+                        className="w-full bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                        Descargar PDF
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      setShowPrintModal(false)
+                      setPrintFormData({ campana_id: "" })
+                    }}
+                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                  >
+                    Cerrar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1527,7 +1967,7 @@ const canalTick = {
                             <span
                               className={`inline-flex px-2 sm:px-3 py-1 text-xs sm:text-sm font-semibold rounded-full border ${getCanalColor(selectedEntrega.canal_id)}`}
                             >
-                              {getNombrePorId(canales, selectedEntrega.canal_id)}
+                              {getNombrePorId(canalesCompleto, selectedEntrega.canal_id)}
                             </span>
                           </div>
                         </div>

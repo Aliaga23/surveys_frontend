@@ -145,3 +145,35 @@ export const iniciarStripeCheckout = (suscriptorId, planId) =>
 
 // Auth
 export const getMe = () => authFetch("/auth/me");
+
+// Entregas por Papel (Bulk)
+export const createBulkEntregas = (campanaId, cantidad) =>
+  authFetch(`/campanas/${campanaId}/entregas/bulk?cantidad=${cantidad}`, { method: "POST", body: "" })
+
+// Descargar formulario PDF individual
+export const downloadFormularioPdf = async (campanaId) => {
+  const token = localStorage.getItem("token")
+
+  if (!token) {
+    throw new Error("No hay token de autenticación")
+  }
+
+  const response = await fetch(`${API_BASE_URL}/entregas/campanas/${campanaId}/formularios.pdf`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      accept: "application/json",
+    },
+  })
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("token")
+      window.location.href = "/login"
+      throw new Error("Sesión expirada")
+    }
+    throw new Error(`Error ${response.status}: ${response.statusText}`)
+  }
+
+  return response.blob()
+}
+
