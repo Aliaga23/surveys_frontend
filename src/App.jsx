@@ -26,6 +26,8 @@ import VerifyRegistrationPage from './pages/VerifyRegistrationPage';
 import CancelPage from './components/dashboard-suscriptor/cancel'; // Nueva página de cancelación
 import SuccessPage from './components/dashboard-suscriptor/success'; // Nueva página de éxito
 import PrivateRoute from './components/PrivateRoute';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   return (
@@ -96,6 +98,9 @@ function App() {
         <Route path="/dashboard-suscriptor/planes" element={
           <PrivateRoute requiredType="suscriptor"><PlanesSuscriptorPage /></PrivateRoute>
         } />
+
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

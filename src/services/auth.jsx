@@ -1,4 +1,5 @@
-const API_URL = "https://surveysbackend-production.up.railway.app"
+// const API_URL = "https://surveysbackend-production.up.railway.app"
+const API_URL = "http://localhost:8000"
 
 export async function registerSuscriptor(userData) {
   try {
@@ -202,6 +203,50 @@ export async function requestRegistration(userData) {
     return await response.json();
   } catch (error) {
     console.error("Error en solicitud de registro:", error);
+    throw error;
+  }
+}
+
+export async function requestPasswordReset(email) {
+  try {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Error al solicitar restablecimiento de contraseña");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error al solicitar restablecimiento:", error);
+    throw error;
+  }
+}
+
+export async function resetPassword(token, newPassword) {
+  try {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token, new_password: newPassword }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Error al cambiar la contraseña");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error al restablecer contraseña:", error);
     throw error;
   }
 }

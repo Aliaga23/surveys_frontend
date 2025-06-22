@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, ArrowRight, BarChart3, Menu, X } from "lucide-react"
 import { login } from "../services/auth"
+import { Link } from "react-router-dom"
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -221,17 +222,22 @@ const Login = () => {
               </div>
 
               {/* Remember me & Forgot password */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between"> 
                 <div className="flex items-center">
                   <input
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-primary focus:ring-primary border-border-default rounded"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-text-secondary">
                     Recordarme
                   </label>
+                </div>
+                <div className="text-sm">
+                  <Link to="/forgot-password" className="text-primary hover:text-primary-hover font-medium transition-colors">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
                 </div>
               </div>
 
