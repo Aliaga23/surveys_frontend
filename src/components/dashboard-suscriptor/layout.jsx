@@ -70,6 +70,12 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
           isActive: activeSection === "destinatarios",
         },
         {
+          title: "Operadores",
+          url: "/dashboard-suscriptor/operadores",
+          icon: Users,
+          isActive: activeSection === "operadores",
+        },
+        {
           title: "Campañas",
           url: "/dashboard-suscriptor/campanas",
           icon: Target,
