@@ -1,6 +1,5 @@
 // src/services/api-admin.js
 const API_BASE_URL = "https://surveysbackend-production.up.railway.app"
-
 const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token")
   if (!token) throw new Error("No hay token de autenticación")
@@ -122,3 +121,28 @@ export const eliminarCanal = (id) =>
   authFetch(`/catalogos/canales/${id}`, {
     method: "DELETE",
   })
+
+// Funciones para el perfil del admin
+export async function updateAdmin(data) {
+  const token = localStorage.getItem("token")
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/update/admin`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.detail || "Error al actualizar el perfil del administrador")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("Error al actualizar administrador:", error)
+    throw error
+  }
+}

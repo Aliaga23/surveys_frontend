@@ -177,3 +177,29 @@ export const downloadFormularioPdf = async (campanaId) => {
   return response.blob()
 }
 
+// Funciones para el perfil del suscriptor
+export async function updateSuscriptor(data) {
+  console.log('data', data)
+  const token = localStorage.getItem("token")
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/update/suscriptor`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.detail || "Error al actualizar el perfil del suscriptor")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("Error al actualizar suscriptor:", error)
+    throw error
+  }
+}
+
