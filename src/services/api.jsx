@@ -78,6 +78,14 @@ export const createDestinatario = (data) => authFetch("/destinatarios", { method
 export const updateDestinatario = (id, data) =>
   authFetch(`/destinatarios/${id}`, { method: "PATCH", body: JSON.stringify(data) })
 export const deleteDestinatario = (id) => authFetch(`/destinatarios/${id}`, { method: "DELETE" })
+//Operadores
+export const registerOperator = (data) =>
+  authFetch("/auth/register/usuario", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+export const listOperadores = (suscriptorId) =>
+  authFetch(`/auth/operadores/${suscriptorId}`);
 
 // Campañas
 export const getCampanas = () => authFetch("/campanas")

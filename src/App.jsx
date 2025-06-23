@@ -30,6 +30,7 @@ import SuccessPage from './components/dashboard-suscriptor/success'; // Nueva p�
 import PrivateRoute from './components/PrivateRoute';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import Operadores from './components/dashboard-suscriptor/Operadores';
 
 function App() {
   return (
@@ -42,10 +43,10 @@ function App() {
         <Route path="/encuestas/:token" element={<EncuestaPage />} />
         <Route path="/email-sent" element={<EmailSentPage />} />
         <Route path="/verify-registration" element={<VerifyRegistrationPage />} />
-        
+
         {/* Ruta pública para cancelación */}
         <Route path="/dashboard-suscriptor/planes/cancel" element={<CancelPage />} /> {/* Ruta para la página de cancelación */}
-        
+
         {/* Ruta pública para éxito */}
         <Route path="/dashboard-suscriptor/planes/success" element={<SuccessPage />} /> {/* Ruta para la página de éxito */}
 
@@ -105,6 +106,9 @@ function App() {
         } />
         <Route path="/dashboard-suscriptor/perfil-suscriptor" element={
           <PrivateRoute requiredType="suscriptor"><PerfilSuscriptor /></PrivateRoute>
+        } />
+        <Route path="/dashboard-suscriptor/operadores" element={
+          <PrivateRoute requiredType="suscriptor"><Operadores /></PrivateRoute>
         } />
 
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
