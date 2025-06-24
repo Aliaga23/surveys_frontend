@@ -16,8 +16,15 @@ const Operadores = () => {
         try {
             const data = await listOperadores(userId);
             setOperadores(data);
+            localStorage.setItem(`operadores_${userId}`, JSON.stringify(data)); // Guardar local
         } catch (err) {
             console.error("Error al obtener operadores", err);
+
+            //  Recuperar desde localStorage si estamos offline
+            const local = localStorage.getItem(`operadores_${userId}`);
+            if (local) {
+                setOperadores(JSON.parse(local));
+            }
         } finally {
             setLoading(false);
         }
