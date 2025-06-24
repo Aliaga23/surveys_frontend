@@ -117,7 +117,7 @@ const CanalesPage = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {        /* Stats Cardssss */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center">
