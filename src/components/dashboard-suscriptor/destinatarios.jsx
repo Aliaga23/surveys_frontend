@@ -1,6 +1,6 @@
 
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react"  
 import DashboardSuscriptorLayout from "./layout"
 import { getDestinatarios, createDestinatario, updateDestinatario, deleteDestinatario } from "../../services/api"
 

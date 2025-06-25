@@ -119,9 +119,14 @@ const PerfilAdmin = () => {
 
   return (
     <DashboardLayout activeSection="perfil">
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Perfil del Usuario</h1>
+      <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
+        {/* Cabecera */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+          <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">Perfil del Administrador</h1>
+          <p className="text-slate-600 text-lg">Gestiona tu información y seguridad</p>
+          </div>
+
           {usuario && (
             <div className="flex items-center gap-2">
               {isEditing ? (
@@ -129,14 +134,14 @@ const PerfilAdmin = () => {
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                    className="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 transition-all"
                   >
                     {isSaving ? <Loader2 className="animate-spin h-4 w-4" /> : <Save className="h-4 w-4" />}
                     Guardar
                   </button>
                   <button
                     onClick={handleEditToggle}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+                    className="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-slate-700 bg-slate-200 hover:bg-slate-300 transition-all"
                   >
                     <X className="h-4 w-4" />
                     Cancelar
@@ -145,7 +150,7 @@ const PerfilAdmin = () => {
               ) : (
                 <button
                   onClick={handleEditToggle}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  className="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/25"
                 >
                   <Edit className="h-4 w-4" />
                   Editar Perfil
@@ -154,7 +159,7 @@ const PerfilAdmin = () => {
             </div>
           )}
         </div>
-
+        {/* Notificación */}
         {notification.message && (
           <div
             className={`p-4 mb-4 text-sm rounded-lg ${
@@ -169,12 +174,12 @@ const PerfilAdmin = () => {
 
         {loading ? (
           <div className="flex justify-center items-center h-40">
-            <Loader2 className="animate-spin h-8 w-8 text-gray-500" />
+            <Loader2 className="animate-spin h-8 w-8 text-slate-500" />
           </div>
         ) : usuario ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2">
-              <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="md:col-span-1">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center space-x-4 mb-6">
                   <div className="p-3 rounded-full bg-blue-50">
                     <User className="h-8 w-8 text-blue-600" />
@@ -234,14 +239,14 @@ const PerfilAdmin = () => {
               </div>
             </div>
             <div className="md:col-span-1">
-              <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full">
-                <h3 className="font-bold text-lg mb-4">Seguridad</h3>
-                <p className="text-sm text-gray-600 mb-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
+                <h3 className="font-bold text-lg mb-4 text-slate-900">Seguridad</h3>
+                <p className="text-sm text-slate-600 mb-6">
                   Para cambiar tu contraseña, te enviaremos un enlace seguro a tu correo electrónico.
                 </p>
                 <button
                   onClick={handleRequestPasswordReset}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-black"
+                  className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
                 >
                   <KeyRound className="h-4 w-4" />
                   Cambiar Contraseña
@@ -250,7 +255,7 @@ const PerfilAdmin = () => {
             </div>
           </div>
         ) : (
-          <p className="text-center text-gray-500">No se pudo cargar la información del usuario.</p>
+          <p className="text-center text-slate-500">No se pudo cargar la información del usuario.</p>
         )}
       </div>
     </DashboardLayout>

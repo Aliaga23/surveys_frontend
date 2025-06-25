@@ -252,7 +252,7 @@ const PerfilSuscriptor = () => {
             </div>
 
             {/* Tarjeta de seguridad */}
-            <div>
+            <div className="md:col-span-1">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
                 <h3 className="font-bold text-lg mb-4 text-slate-900">Seguridad</h3>
                 <p className="text-sm text-slate-600 mb-6">
