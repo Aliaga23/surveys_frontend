@@ -114,8 +114,33 @@ export function isAuthenticated() {
 }
 
 export function logout() {
-  localStorage.removeItem("token")
-  window.location.href = "/login"
+  localStorage.clear();
+
+  if ('caches' in window) {
+    caches.keys().then((names) => {
+      for (const name of names) {
+        caches.delete(name);
+      }
+    });
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then((registration) => {
+      if (registration) {
+        registration.unregister().then(() => {
+          navigator.serviceWorker
+            .register('/service-worker.js?force=' + Date.now())
+            .then(() => {
+              window.location.href = "/login";
+            });
+        });
+      } else {
+        window.location.href = "/login";
+      }
+    });
+  } else {
+    window.location.href = "/login";
+  }
 }
 
 export function getAuthToken() {
