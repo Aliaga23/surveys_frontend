@@ -32,7 +32,11 @@ import PrivateRoute from './components/PrivateRoute';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import Operadores from './components/dashboard-suscriptor/Operadores';
-
+import DashboardPage from './components/dashboard-suscriptor/dashboard';
+// Componentes de operador
+import PlantillasOperadorPage from './components/dashboard-operador/plantillas';
+import DestinatariosOperadorPage from './components/dashboard-operador/destinatarios';
+import EntregasOperadorPage from './components/dashboard-operador/entregas';
 function App() {
   return (
     <Router>
@@ -111,8 +115,22 @@ function App() {
         } />
         <Route path="/dashboard-suscriptor/operadores" element={
           <PrivateRoute requiredType="suscriptor"><Operadores /></PrivateRoute>
+        } />        <Route path="/dashboard-suscriptor/dashboard" element={
+          <PrivateRoute requiredType="suscriptor"><DashboardPage /></PrivateRoute>
         } />
 
+        {/* Rutas protegidas - operador */}
+        <Route path="/dashboard-operador/plantillas" element={
+          <PrivateRoute requiredType="operator"><PlantillasOperadorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-operador/destinatarios" element={
+          <PrivateRoute requiredType="operator"><DestinatariosOperadorPage /></PrivateRoute>
+        } />
+        <Route path="/dashboard-operador/entregas" element={
+          <PrivateRoute requiredType="operator"><EntregasOperadorPage /></PrivateRoute>
+        } />
+
+        {/* Rutas de autenticación */}
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 

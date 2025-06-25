@@ -1,16 +1,11 @@
-// src/components/layouts/DashboardSuscriptorLayout.jsx
+// src/components/dashboard-operador/layout.jsx
 import { useState, useEffect, useRef } from "react"
 import {
-  BarChart3,
   FileText,
-  Target,
-  MessageSquare,
   Users,
-  Settings,
   LogOut,
   Search,
   User,
-  UserCog,
   PhoneCall,
   MessageCircle,
   X,
@@ -33,14 +28,13 @@ import {
   SidebarTrigger,
 } from "../sidebar"
 
-const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) => {
+const DashboardOperadorLayout = ({ children, activeSection = "plantillas" }) => {
   /* ──────────────────────── Auth & user ─────────────────────── */
   const { logout } = useAuth()
   const [user, setUser] = useState({
-    name: "Usuario Suscriptor",
-    email: "usuario@empresa.com",
+    name: "Usuario Operador",
+    email: "operador@empresa.com",
     avatar: "/placeholder.svg?height=32&width=32",
-    plan: "Professional",
   })
 
   useEffect(() => {
@@ -49,7 +43,7 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
         const userData = await getCurrentUser()
         setUser((prev) => ({
           ...prev,
-          name: userData?.nombre ?? prev.name,
+          name: userData?.nombre_completo ?? prev.name,
           email: userData?.email ?? prev.email,
         }))
       } catch (err) {
@@ -108,17 +102,13 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
   const getBotResponse = (msg) => {
     const m = msg.toLowerCase()
     if (/plantilla|template/.test(m))
-      return "Para crear una plantilla, dirígete a “Plantillas → Nueva plantilla”. Allí eliges el tipo de pregunta y personalizas el diseño."
-    if (/campaña|campaign/.test(m))
-      return "Para lanzar una campaña necesitas al menos una plantilla y destinatarios. Ve a “Campañas → Nueva campaña” y sigue el asistente."
+      return "Para gestionar una plantilla, navega a la sección de 'Plantillas' donde puedes ver y editar las plantillas asignadas."
     if (/destinatario|contacto/.test(m))
-      return "Añade destinatarios de forma individual o subiendo un CSV en “Destinatarios”."
+      return "Puedes gestionar los destinatarios en la sección 'Destinatarios', viendo los contactos asignados para las encuestas."
     if (/entrega|envío/.test(m))
-      return "Las entregas se generan automáticamente al activar una campaña. Revisa su estado en “Entregas”."
-    if (/respuesta|resultado/.test(m))
-      return "Analiza las respuestas y métricas en la sección “Respuestas”."
+      return "Revisa el estado de las entregas en la sección 'Entregas'."
     if (/ayuda|help/.test(m))
-      return "Puedo orientarte sobre plantillas, campañas, destinatarios, entregas o análisis de respuestas. ¿Qué deseas hacer?"
+      return "Puedo orientarte sobre plantillas, destinatarios, o entregas. ¿Qué deseas hacer?"
     return "Entiendo tu consulta, ¿podrías darme más detalles?"
   }
 
@@ -130,26 +120,11 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
   /* ─────────────────────── Menú lateral ─────────────────────── */
   const menu = [
     {
-      title: "Panel Principal",
-      items: [
-        { title: "Dashboard", url: "/dashboard-suscriptor/dashboard", icon: BarChart3 },
-      ],
-    },
-    {
       title: "Gestión de Encuestas",
       items: [
-        { title: "Plantillas", url: "/dashboard-suscriptor/plantillas", icon: FileText },
-        { title: "Destinatarios", url: "/dashboard-suscriptor/destinatarios", icon: Users },
-        { title: "Operadores", url: "/dashboard-suscriptor/operadores", icon: UserCog },
-        { title: "Campañas", url: "/dashboard-suscriptor/campanas", icon: Target },
-        { title: "Respuestas", url: "/dashboard-suscriptor/respuestas", icon: MessageSquare },
-        { title: "Entregas", url: "/dashboard-suscriptor/entregas", icon: PhoneCall },
-      ],
-    },
-    {
-      title: "Sistema",
-      items: [
-        { title: "Configuración", url: "/dashboard-suscriptor/configuracion", icon: Settings },
+        { title: "Plantillas", url: "/dashboard-operador/plantillas", icon: FileText },
+        { title: "Destinatarios", url: "/dashboard-operador/destinatarios", icon: Users },
+        { title: "Entregas", url: "/dashboard-operador/entregas", icon: PhoneCall },
       ],
     },
   ]
@@ -161,10 +136,10 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
         <SidebarHeader className="h-16 flex items-center px-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 grid place-items-center bg-blue-600 rounded-lg">
-              <BarChart3 className="h-6 w-6 text-white" />
+              <User className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">SurveySaaS</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Operador</h2>
               <p className="text-sm text-gray-500">Panel de Control</p>
             </div>
           </div>
@@ -215,7 +190,7 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
               <div className="relative hidden sm:block">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
-                  placeholder="Buscar plantillas, campañas..."
+                  placeholder="Buscar plantillas, destinatarios..."
                   className="pl-10 pr-4 py-2 w-48 lg:w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
@@ -329,4 +304,4 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
   )
 }
 
-export default DashboardSuscriptorLayout
+export default DashboardOperadorLayout

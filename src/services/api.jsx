@@ -199,6 +199,10 @@ export const getRespuestas = (campanId = null) => {
   return authFetch(endpoint)
 }
 
+// Dashboard API
+export const getDashboardData = async () => {
+  return authFetch('/analytics/dashboard')
+}
 
 // Planes
 export const listPlanes = () => authFetch("/subscription/planes");

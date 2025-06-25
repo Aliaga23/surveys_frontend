@@ -42,10 +42,12 @@ export async function login(credentials) {
 
     localStorage.setItem("user", JSON.stringify(userInfo)); //  Guarda usuario local para offline
 
-    if (userInfo.rol === "admin") {
+  if (userInfo.rol === "admin") {
       window.location.href = "/dashboard/roles";
     } else if (userInfo.tipo === "suscriptor") {
       window.location.href = "/dashboard-suscriptor/plantillas";
+    } else if (userInfo.tipo === "operator") {
+      window.location.href = "/dashboard-operador/plantillas";
     }
 
     return { ...data, user: userInfo };
@@ -127,6 +129,8 @@ export function redirectBasedOnRole(user) {
     return "/dashboard/roles"
   } else if (user.tipo === "suscriptor") {
     return "/dashboard-suscriptor/plantillas"
+  } else if (user.tipo === "operator") {
+    return "/dashboard-operador/plantillas"
   }
   return "/login"
 }
@@ -135,14 +139,14 @@ export async function checkRouteAccess(requiredType) {
   try {
     if (!isAuthenticated()) {
       return { hasAccess: false, redirectTo: "/login" }
-    }
-
-    const user = await getCurrentUser()
+    }    const user = await getCurrentUser()
     let hasAccess = false
-
+    
     if (requiredType === "admin" && user.rol === "admin") {
       hasAccess = true
     } else if (requiredType === "suscriptor" && user.tipo === "suscriptor") {
+      hasAccess = true
+    } else if (requiredType === "operator" && user.tipo === "operator") {
       hasAccess = true
     }
 
