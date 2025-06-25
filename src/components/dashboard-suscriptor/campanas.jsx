@@ -55,13 +55,13 @@ export default function Campanas() {
     let filtered = campanas
 
     if (searchTerm) {
-      filtered = filtered.filter((campana) => 
+      filtered = filtered.filter((campana) =>
         campana.nombre.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
     if (filterStatus !== "all") {
-      filtered = filtered.filter((campana) => 
+      filtered = filtered.filter((campana) =>
         campana.estado_id.toString() === filterStatus
       )
     }
@@ -252,40 +252,100 @@ export default function Campanas() {
 
   return (
     <DashboardSuscriptorLayout activeSection="campanas">
-      <div className="p-8 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+      <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Header con estadísticas */}
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-3">Gestión de Campañas</h1>
-              <p className="text-gray-600 text-lg">Crea y administra tus campañas de encuestas de manera eficiente</p>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
+                Gestión de Campañas
+              </h1>
+              <p className="text-slate-600 text-lg">Crea y administra tus campañas de encuestas de manera eficiente</p>
+            </div>
+          </div>
+
+          {/* Estadísticas */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Total</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.total}</p>
+                  <p className="text-slate-500 text-xs mt-1 truncate">Total Campañas</p>
+                </div>
+                <div className="flex-shrink-0 ml-3">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
-            {/* Estadísticas */}
-            <div className="flex gap-4 flex-wrap">
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 min-w-[120px]">
-                <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-                <div className="text-sm text-gray-600">Total</div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Borradores</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.borrador}</p>
+                  <p className="text-slate-500 text-xs mt-1 truncate">Campañas en Borrador</p>
+                </div>
+                <div className="flex-shrink-0 ml-3">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
               </div>
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 min-w-[120px]">
-                <div className="text-2xl font-bold text-gray-600">{stats.borrador}</div>
-                <div className="text-sm text-gray-600">Borradores</div>
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Programadas</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.programadas}</p>
+                  <p className="text-slate-500 text-xs mt-1 truncate">Campañas Programadas</p>
+                </div>
+                <div className="flex-shrink-0 ml-3">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                    />
+                  </svg>
+                </div>
               </div>
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 min-w-[120px]">
-                <div className="text-2xl font-bold text-yellow-600">{stats.programadas}</div>
-                <div className="text-sm text-gray-600">Programadas</div>
-              </div>
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 min-w-[120px]">
-                <div className="text-2xl font-bold text-green-600">{stats.enviadas + stats.cerradas}</div>
-                <div className="text-sm text-gray-600">Activas</div>
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Activas</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.enviadas + stats.cerradas}</p>
+                  <p className="text-slate-500 text-xs mt-1 truncate">Campañas Activas</p>
+                </div>
+                <div className="flex-shrink-0 ml-3">
+                  <svg className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Barra de herramientas */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 mb-8 shadow-xl shadow-slate-200/20">
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               {/* Búsqueda */}
               <div className="relative flex-1 max-w-md">
@@ -304,7 +364,7 @@ export default function Campanas() {
                   placeholder="Buscar campañas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white/70 backdrop-blur-sm placeholder-slate-400 focus:outline-none focus:placeholder-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
                 />
               </div>
 
@@ -312,7 +372,7 @@ export default function Campanas() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                className="px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
               >
                 <option value="all">Todos los estados</option>
                 {estados.map((estado) => (
@@ -323,10 +383,11 @@ export default function Campanas() {
               </select>
             </div>
 
-            {/* Botón nueva campaña */}
+
+            {/* Botón nueva plantilla */}
             <button
               onClick={() => setShowModal(true)}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105"
+              className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -398,7 +459,7 @@ export default function Campanas() {
             {filteredCampanas.map((campana, index) => (
               <div
                 key={campana.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1 flex flex-col h-full min-h-[320px]"
+                className="bg-white/80 rounded-2xl shadow-sm border-white/20 hover:shadow-xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1 flex flex-col h-full min-h-[280px]"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="p-6 flex flex-col flex-1">
@@ -418,15 +479,14 @@ export default function Campanas() {
                             className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full transition-all border ${getEstadoColor(campana.estado_id)}`}
                           >
                             <div
-                              className={`w-2 h-2 rounded-full mr-2 mt-0.5 ${
-                                campana.estado_id === 1
+                              className={`w-2 h-2 rounded-full mr-2 mt-0.5 ${campana.estado_id === 1
                                   ? "bg-gray-500"
                                   : campana.estado_id === 2
                                     ? "bg-yellow-500"
                                     : campana.estado_id === 3
                                       ? "bg-blue-500"
                                       : "bg-green-500"
-                              }`}
+                                }`}
                             ></div>
                             {getNombrePorId(estados, campana.estado_id)}
                           </span>

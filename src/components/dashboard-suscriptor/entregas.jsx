@@ -418,15 +418,15 @@ export default function Entregas() {
 
   return (
     <DashboardSuscriptorLayout activeSection="entregas">
-      <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+      <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Header */}
         <div className="mb-6 lg:mb-8">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 lg:gap-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 lg:mb-3">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
                 Gestión de Entregas
               </h1>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600">
+              <p className="text-slate-600 text-lg">
                 Administra las entregas de encuestas por campaña y canal
               </p>
             </div>
@@ -435,7 +435,7 @@ export default function Entregas() {
 
         {/* Estadísticas */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.total}</div>
@@ -456,7 +456,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.pendientes}</div>
@@ -477,7 +477,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.enviados}</div>
@@ -498,7 +498,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.respondidos}</div>
@@ -519,7 +519,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200 col-span-2 sm:col-span-1">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 col-span-2 sm:col-span-1">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.fallidos}</div>

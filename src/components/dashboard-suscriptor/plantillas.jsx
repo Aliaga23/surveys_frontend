@@ -54,23 +54,23 @@ export default function Plantillas() {
     loadData()
   }, [])
 
- const filterPlantillas = useCallback(() => {
-  let filtered = plantillas
+  const filterPlantillas = useCallback(() => {
+    let filtered = plantillas
 
-  if (searchTerm) {
-    filtered = filtered.filter(
-      (plantilla) =>
-        plantilla.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        plantilla.descripcion.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-  }
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (plantilla) =>
+          plantilla.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          plantilla.descripcion.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
 
-  if (filterStatus !== "all") {
-    filtered = filtered.filter((plantilla) => (filterStatus === "active" ? plantilla.activo : !plantilla.activo))
-  }
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((plantilla) => (filterStatus === "active" ? plantilla.activo : !plantilla.activo))
+    }
 
-  setFilteredPlantillas(filtered)
-}, [plantillas, searchTerm, filterStatus])
+    setFilteredPlantillas(filtered)
+  }, [plantillas, searchTerm, filterStatus])
 
   const loadPreguntas = async (plantillaId) => {
     try {
@@ -113,7 +113,7 @@ export default function Plantillas() {
     }
   }
 
- 
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -461,72 +461,88 @@ export default function Plantillas() {
 
   return (
     <DashboardSuscriptorLayout activeSection="plantillas">
-      <div className="p-8 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+      <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Header con estadísticas */}
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-3">Plantillas de Encuestas</h1>
-              <p className="text-gray-600 text-lg">Crea y gestiona plantillas para tus encuestas de manera eficiente</p>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
+                Plantillas de Encuestas
+              </h1>
+              <p className="text-slate-600 text-lg">Crea y gestiona plantillas para tus encuestas de manera eficiente</p>
             </div>
           </div>
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-sm border border-white/20 min-w-[100px] sm:min-w-[120px]">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</div>
-                <div className="text-xs sm:text-sm text-gray-600 truncate">Total</div>
+              <div className="min-w-0 flex-1">
+                <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Total</p>
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.total}</p>
+                <p className="text-slate-500 text-xs mt-1 truncate">Total Plantillas</p>
               </div>
-              <svg
-                className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
+              <div className="flex-shrink-0 ml-3">
+                <svg
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+
+                </svg>
+              </div>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-sm border border-white/20 min-w-[100px] sm:min-w-[120px]">
+
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.active}</div>
-                <div className="text-xs sm:text-sm text-gray-600 truncate">Activas</div>
+              <div className="min-w-0 flex-1">
+                <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Activas</p>
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.active}</p>
+                <p className="text-slate-500 text-xs mt-1 truncate">Plantillas Activas</p>
               </div>
-              <svg
-                className="w-6 h-6 sm:w-8 sm:h-8 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <div className="flex-shrink-0 ml-3">
+                <svg
+                  className="w-6 h-6 sm:w-8 sm:h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+
+              </div>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 shadow-sm border border-white/20 min-w-[100px] sm:min-w-[120px]">
+
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xl sm:text-2xl font-bold text-gray-900">{stats.inactive}</div>
-                <div className="text-xs sm:text-sm text-gray-600 truncate">Inactivas</div>
+              <div className="min-w-0 flex-1">
+                <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1 truncate">Inactivas</p>
+                <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stats.inactive}</p>
+                <p className="text-slate-500 text-xs mt-1 truncate">Plantillas Inactivas </p>
               </div>
-              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <div className="flex-shrink-0 ml-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+
+              </div>
             </div>
           </div>
         </div>
 
         {/* Barra de herramientas */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 mb-8 shadow-xl shadow-slate-200/20">
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               {/* Búsqueda */}
               <div className="relative flex-1 max-w-md">
@@ -545,7 +561,7 @@ export default function Plantillas() {
                   placeholder="Buscar plantillas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-white/70 backdrop-blur-sm placeholder-slate-400 focus:outline-none focus:placeholder-slate-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
                 />
               </div>
 
@@ -553,18 +569,19 @@ export default function Plantillas() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                className="px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
               >
                 <option value="all">Todos los estados</option>
                 <option value="active">Solo activas</option>
                 <option value="inactive">Solo inactivas</option>
               </select>
             </div>
-
+            
+            
             {/* Botón nueva plantilla */}
             <button
               onClick={() => setShowModal(true)}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105"
+              className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -636,7 +653,7 @@ export default function Plantillas() {
             {filteredPlantillas.map((plantilla, index) => (
               <div
                 key={plantilla.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1 flex flex-col h-full min-h-[280px]"
+                className="bg-white/80 rounded-2xl shadow-sm border-white/20 hover:shadow-xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-1 flex flex-col h-full min-h-[280px]"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="p-6 flex flex-col flex-1">
@@ -652,11 +669,10 @@ export default function Plantillas() {
                       </div>
                       <div className="flex items-center gap-2 mt-auto">
                         <span
-                          className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-                            plantilla.activo
-                              ? "bg-green-100 text-green-800 border border-green-200"
-                              : "bg-red-100 text-red-800 border border-red-200"
-                          }`}
+                          className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full transition-all ${plantilla.activo
+                            ? "bg-green-100 text-green-800 border border-green-200"
+                            : "bg-red-100 text-red-800 border border-red-200"
+                            }`}
                         >
                           <div
                             className={`w-2 h-2 rounded-full mr-2 mt-0.5 ${plantilla.activo ? "bg-green-500" : "bg-red-500"}`}
