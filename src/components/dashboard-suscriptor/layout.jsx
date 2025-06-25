@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect } from "react"
-import { BarChart3, FileText, Target, MessageSquare, Users, Settings, LogOut, Bell, Search } from "lucide-react"
+import { BarChart3, FileText, Target, MessageSquare, Users, Settings, LogOut, Search, User, UserCog, PhoneCall } from "lucide-react"
 import { getCurrentUser } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext";
 import {
@@ -74,7 +74,7 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
         {
           title: "Operadores",
           url: "/dashboard-suscriptor/operadores",
-          icon: Users,
+          icon: UserCog,
           isActive: activeSection === "operadores",
         },
         {
@@ -92,7 +92,7 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
         {
           title: "Entregas",
           url: "/dashboard-suscriptor/entregas",
-          icon: MessageSquare,
+          icon: PhoneCall,
           isActive: activeSection === "entregas",
         }
       ],
@@ -120,7 +120,7 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={closeSidebar}>
-        <SidebarHeader>
+        <SidebarHeader className="h-16 flex items-center px-4">
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
               <BarChart3 className="h-6 w-6 text-white" />
@@ -183,20 +183,19 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
             </div>
 
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
               <Link
                 to="/dashboard-suscriptor/perfil-suscriptor"
                 className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
               >
-                <img
-                  src={user.avatar || "/placeholder.svg"}
-                  alt={user.name}
-                  className="w-8 h-8 rounded-full bg-gray-300"
-                />
-                <span className="text-sm font-medium text-gray-700 hidden sm:block">{user.name}</span>
+                {/* Avatar sustituido por icono */}
+                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+
+                {/* Nombre (solo en pantallas ≥ sm) */}
+                <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                  {user.name}
+                </span>
               </Link>
             </div>
           </div>

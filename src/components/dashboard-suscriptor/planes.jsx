@@ -69,7 +69,7 @@ const Planes = () => {
           {planes.map((plan) => (
             <div
               key={plan.id}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 flex flex-col"
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1 flex flex-col"
             >
               <h2 className="text-xl font-semibold text-slate-900 mb-1 truncate">{plan.nombre}</h2>
               <div className="text-3xl font-bold text-slate-900 mb-4">

@@ -46,7 +46,8 @@ const Configuracion = () => {
             <p className="text-red-700 font-medium">{error}</p>
           </div>
         ) : (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 max-w-3xl">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1 max-w-3xl ">
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <p className="text-xs sm:text-sm text-slate-500 font-medium mb-1">Nombre</p>
@@ -85,7 +86,7 @@ const Configuracion = () => {
             <div className="mt-8 text-center">
               <button
                 onClick={() => (window.location.href = "/dashboard-suscriptor/planes")}
-                className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                className="inline-flex  max-w-sm md:max-w-md items-center justify-center px-14 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
               >
                 Mejorar Plan
               </button>
