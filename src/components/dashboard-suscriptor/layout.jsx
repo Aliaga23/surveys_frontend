@@ -20,6 +20,7 @@ import {
 import { useLocation } from "react-router-dom"
 import { getCurrentUser } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"
+import { Link } from "react-router-dom"
 
 import {
   Sidebar,
@@ -238,16 +239,20 @@ const DashboardSuscriptorLayout = ({ children }) => {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
-                <div className="w-8 h-8 grid place-items-center rounded-full bg-blue-600">
+                <Link
+                to="/dashboard-suscriptor/perfil-suscriptor"
+                className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+              >
+                {/* Avatar sustituido por icono */}
+                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-600">
                   <User className="w-4 h-4 text-white" />
                 </div>
+
+                {/* Nombre (solo en pantallas ≥ sm) */}
                 <span className="text-sm font-medium text-gray-700 hidden sm:block">
                   {user.name}
                 </span>
-              </div>
-            </div>
+              </Link>
           </div>
         </header>
 
