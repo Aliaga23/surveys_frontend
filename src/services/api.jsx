@@ -1,4 +1,7 @@
+import { addToOfflineQueue, isOnline, registerSync } from './offlineSync'
+
 const API_BASE_URL = "https://surveysbackend-production.up.railway.app"
+
 // Función para hacer requests autenticados
 const authFetch = async (endpoint, options = {}) => {
   const token = localStorage.getItem("token")
@@ -16,20 +19,86 @@ const authFetch = async (endpoint, options = {}) => {
     ...options,
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem("token")
-      window.location.href = "/login"
-      throw new Error("Sesión expirada")
+  // Para métodos que modifican datos (POST, PUT, PATCH, DELETE)
+  if (!isOnline() && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method)) {
+    console.log(`Dispositivo offline. Guardando ${options.method} ${endpoint} para sincronizar más tarde.`)
+    
+    // Extraer el body como un objeto para almacenar
+    let data = null
+    if (options.body) {
+      try {
+        data = typeof options.body === 'string' ? JSON.parse(options.body) : options.body
+      } catch (e) {
+        console.error('Error parsing request body:', e)
+        data = options.body
+      }
     }
-    const errorData = await response.text()
-    throw new Error(`Error ${response.status}: ${errorData}`)
+
+    // Agregar a la cola offline
+    await addToOfflineQueue(endpoint, options.method, data)
+    
+    // Registrar para background sync si está disponible
+    await registerSync()
+
+    // Retornar una respuesta simulada para la UI
+    // Podemos devolver un objeto con un ID temporal o un estado pendiente
+    if (options.method === 'DELETE') {
+      return true // Simular éxito para DELETE
+    }
+    
+    return {
+      id: `offline_${new Date().getTime()}`,
+      _offlineCreated: true,
+      ...data,
+      status: 'pending'
+    }
   }
 
-  if (response.status === 204) return true
-  return response.json()
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem("token")
+        window.location.href = "/login"
+        throw new Error("Sesión expirada")
+      }
+      const errorData = await response.text()
+      throw new Error(`Error ${response.status}: ${errorData}`)
+    }
+
+    if (response.status === 204) return true
+    return response.json()
+  } catch (error) {
+    if (!isOnline() && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method)) {
+      // Si hay un error de red, intentar guardar offline
+      console.log(`Error de red. Guardando ${options.method} ${endpoint} para sincronizar después.`)
+      
+      let data = null
+      if (options.body) {
+        try {
+          data = typeof options.body === 'string' ? JSON.parse(options.body) : options.body
+        } catch (e) {
+          data = options.body
+        }
+      }
+
+      await addToOfflineQueue(endpoint, options.method, data)
+      await registerSync()
+
+      if (options.method === 'DELETE') {
+        return true
+      }
+      
+      return {
+        id: `offline_${new Date().getTime()}`,
+        _offlineCreated: true,
+        ...data,
+        status: 'pending'
+      }
+    }
+    throw error
+  }
 }
 
 // Plantillas

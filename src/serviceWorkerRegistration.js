@@ -22,6 +22,17 @@ export function register(config) {
       } else {
         registerValidSW(swUrl, config);
       }
+      
+      // Escuchar mensajes del service worker
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'CACHE_UPDATED') {
+          console.log('Contenido actualizado en caché:', event.data.url);
+          // Si la URL actualizada es relevante para la página actual, actualizar UI
+          if (window.location.href.includes(event.data.url)) {
+            window.location.reload();
+          }
+        }
+      });
     });
   }
 }

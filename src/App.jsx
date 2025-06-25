@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import OfflineIndicator from './components/OfflineIndicator';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -35,6 +36,7 @@ import Operadores from './components/dashboard-suscriptor/Operadores';
 function App() {
   return (
     <Router>
+      <OfflineIndicator />
       <Routes>
         {/* Rutas públicas */}
         <Route path="/" element={<LandingPage />} />
