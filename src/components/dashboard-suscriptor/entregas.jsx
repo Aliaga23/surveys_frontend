@@ -435,7 +435,7 @@ export default function Entregas() {
 
         {/* Estadísticas */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.total}</div>
@@ -456,7 +456,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.pendientes}</div>
@@ -477,7 +477,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.enviados}</div>
@@ -498,7 +498,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.respondidos}</div>
@@ -519,7 +519,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 col-span-2 sm:col-span-1">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 col-span-2 sm:col-span-1">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.fallidos}</div>
@@ -543,7 +543,7 @@ export default function Entregas() {
         </div>
 
         {/* Barra de herramientas */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 lg:mb-8">
+        <div className="bg-white/80 rounded-2xl shadow-sm border border-white/20 p-4 sm:p-6 mb-6 lg:mb-8 shadow-xl shadow-slate-200/20">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Búsqueda */}
@@ -568,7 +568,7 @@ export default function Entregas() {
                   placeholder="Buscar por campaña o destinatario..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -577,7 +577,7 @@ export default function Entregas() {
                 <select
                   value={filterCampana}
                   onChange={(e) => setFilterCampana(e.target.value)}
-                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[180px]"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[180px]"
                 >
                   <option value="all">Todas las campañas</option>
                   {campanas.map((campana) => (
@@ -590,7 +590,7 @@ export default function Entregas() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[160px]"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[160px]"
                 >
                   <option value="all">Todos los estados</option>
                   {estados.map((estado) => (
@@ -606,7 +606,7 @@ export default function Entregas() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
+                className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -618,7 +618,7 @@ export default function Entregas() {
               {/* Botón entregas por papel */}
               <button
                 onClick={() => setShowPaperModal(true)}
-                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
+                className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-200 shadow-lg shadow-orange-500/25"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -635,7 +635,7 @@ export default function Entregas() {
               {/* Botón gestión de impresión */}
               <button
                 onClick={() => setShowPrintModal(true)}
-                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
+                className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 shadow-lg shadow-purple-500/25"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
