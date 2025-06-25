@@ -11,6 +11,7 @@ import {
   getDestinatarios,
   createBulkEntregas,
   downloadFormularioPdf,
+  createBulkAudioEntregas,
 } from "../../services/api"
 import DashboardOperadorLayout from "./layout"
 
@@ -43,18 +44,25 @@ export default function Entregas() {
     campana_id: "",
   })
 
+  // Estados para entregas por audio
+  const [showAudioModal, setShowAudioModal] = useState(false)
+  const [audioFormData, setAudioFormData] = useState({
+    campana_id: "",
+    cantidad: 1,
+  })
+
   // Catálogos (sin papel para entregas normales)
   const canales = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
     { id: 2, nombre: "WhatsApp", color: "green", icon: "message-circle" },
-    { id: 3, nombre: "Vapi", color: "purple", icon: "phone" },
+    { id: 5, nombre: "Audio", color: "purple", icon: "phone" },
   ]
 
   // Catálogo completo para mostrar entregas existentes
   const canalesCompleto = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
     { id: 2, nombre: "WhatsApp", color: "green", icon: "message-circle" },
-    { id: 3, nombre: "Vapi", color: "purple", icon: "phone" },
+    { id: 5, nombre: "Audio", color: "purple", icon: "phone" },
     { id: 4, nombre: "Papel", color: "orange", icon: "file-text" },
   ]
 
@@ -65,7 +73,7 @@ export default function Entregas() {
     { id: 4, nombre: "Fallido", color: "red", icon: "x-circle" },
   ]
 
-
+  
 
   const canalGradient = {
     blue: "from-blue-500 to-blue-600",
@@ -74,6 +82,7 @@ export default function Entregas() {
     orange: "from-orange-500 to-orange-600",
   }
 
+  
 
   const [expandedCards, setExpandedCards] = useState(new Set())
   const [showCampanaSelector, setShowCampanaSelector] = useState(false)
@@ -285,6 +294,21 @@ export default function Entregas() {
     }
   }
 
+  // Función para entregas por audio
+  const handleAudioSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const result = await createBulkAudioEntregas(audioFormData.campana_id, audioFormData.cantidad)
+      setShowAudioModal(false)
+      setAudioFormData({ campana_id: "", cantidad: 1 })
+      setError("")
+      loadData()
+      alert(`Se crearon ${result.length} entregas por audio (Canal 5) exitosamente`)
+    } catch (err) {
+      setError("Error al crear entregas por audio: " + err.message)
+    }
+  }
+
   // Nueva función para descargar PDF individual
   const handleDownloadPdf = async (campanaId) => {
     try {
@@ -303,7 +327,7 @@ export default function Entregas() {
     }
   }
 
- 
+
 
   // Obtener campañas que tienen entregas de papel
   const paperCampanas = campanas.filter((campana) => {
@@ -311,10 +335,13 @@ export default function Entregas() {
     return campanEntregas.some((entrega) => entrega.canal_id === 4)
   })
 
+  // Filtrar campañas para entregas por audio (solo las que tienen canal 5)
+  const availableCampanasForAudio = campanas.filter((campana) => campana.canal_id === 5)
+
   // Filtrar campañas para nueva entrega (excluir las que solo tienen canal 4)
   const availableCampanasForNewEntrega = campanas.filter((campana) => {
     // Si la campaña tiene canal_id definido y es 4, no mostrarla
-    if (campana.canal_id === 4) return false
+    if (campana.canal_id === 4 || campana.canal_id === 5) return false
 
     // Si no tiene canal_id definido, verificar si todas sus entregas son de canal 4
     const campanEntregas = entregas[campana.id] || []
@@ -413,20 +440,20 @@ export default function Entregas() {
     setExpandedCards(newExpanded)
   }
 
-  // Filtrar campañas para entregas por papel
+  // Filtrar campañas para entregas por papel (solo las que no tienen canal 4)
   const availableCampanasForPaper = campanas.filter((campana) => campana.canal_id === 4)
 
   return (
     <DashboardOperadorLayout activeSection="entregas">
-      <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
         {/* Header */}
         <div className="mb-6 lg:mb-8">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 lg:gap-6">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 lg:mb-3">
                 Gestión de Entregas
               </h1>
-              <p className="text-slate-600 text-lg">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600">
                 Administra las entregas de encuestas por campaña y canal
               </p>
             </div>
@@ -435,7 +462,7 @@ export default function Entregas() {
 
         {/* Estadísticas */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 lg:mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.total}</div>
@@ -456,7 +483,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.pendientes}</div>
@@ -477,7 +504,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.enviados}</div>
@@ -498,7 +525,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.respondidos}</div>
@@ -519,7 +546,7 @@ export default function Entregas() {
               </svg>
             </div>
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-4 sm:p-6 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 col-span-2 sm:col-span-1">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-200 col-span-2 sm:col-span-1">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{stats.fallidos}</div>
@@ -543,7 +570,7 @@ export default function Entregas() {
         </div>
 
         {/* Barra de herramientas */}
-        <div className="bg-white/80 rounded-2xl shadow-sm border border-white/20 p-4 sm:p-6 mb-6 lg:mb-8 shadow-xl shadow-slate-200/20">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 lg:mb-8">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Búsqueda */}
@@ -568,7 +595,7 @@ export default function Entregas() {
                   placeholder="Buscar por campaña o destinatario..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -577,7 +604,7 @@ export default function Entregas() {
                 <select
                   value={filterCampana}
                   onChange={(e) => setFilterCampana(e.target.value)}
-                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[180px]"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[180px]"
                 >
                   <option value="all">Todas las campañas</option>
                   {campanas.map((campana) => (
@@ -590,7 +617,7 @@ export default function Entregas() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[160px]"
+                  className="px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white min-w-0 sm:min-w-[160px]"
                 >
                   <option value="all">Todos los estados</option>
                   {estados.map((estado) => (
@@ -606,7 +633,7 @@ export default function Entregas() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(true)}
-                className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg shadow-blue-500/25"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -618,7 +645,7 @@ export default function Entregas() {
               {/* Botón entregas por papel */}
               <button
                 onClick={() => setShowPaperModal(true)}
-                className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-200 shadow-lg shadow-orange-500/25"
+                className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -632,10 +659,27 @@ export default function Entregas() {
                 <span className="sm:hidden">Papel</span>
               </button>
 
+              {/* Botón entregas por audio */}
+              <button
+                onClick={() => setShowAudioModal(true)}
+                className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 shadow-lg shadow-emerald-500/25"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M8.464 15.536a5 5 0 010-7.072m-2.828 9.9a9 9 0 010-14.142"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Entregas por Audio</span>
+                <span className="sm:hidden">Audio</span>
+              </button>
+
               {/* Botón gestión de impresión */}
               <button
                 onClick={() => setShowPrintModal(true)}
-                className="inline-flex items-center justify-center px-4 sm:px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 shadow-lg shadow-purple-500/25"
+                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 font-medium transform hover:scale-105 text-sm sm:text-base"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -1759,6 +1803,119 @@ export default function Entregas() {
                       <p className="text-xs text-orange-700">
                         Las entregas por papel se crean automáticamente con <strong>Canal 4 (Papel)</strong>. No
                         requieren destinatarios específicos ya que son para distribución física.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Entregas por Audio */}
+        {showAudioModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-hidden transform transition-all animate-scale-in">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-2xl">
+                <h3 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M8.464 15.536a5 5 0 010-7.072m-2.828 9.9a9 9 0 010-14.142"
+                      />
+                    </svg>
+                  </div>
+                  Crear Entregas por Audio
+                </h3>
+                <p className="text-sm text-gray-600 mt-2">Genera entregas por audio para llamadas automáticas</p>
+              </div>
+
+              <div className="p-6">
+                <form onSubmit={handleAudioSubmit}>
+                  <div className="space-y-6">
+                    {/* Selección de Campaña */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Campaña de Audio <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={audioFormData.campana_id}
+                        onChange={(e) => setAudioFormData({ ...audioFormData, campana_id: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-white"
+                        required
+                      >
+                        <option value="">Seleccionar campaña de audio</option>
+                        {availableCampanasForAudio.map((campana) => (
+                          <option key={campana.id} value={campana.id}>
+                            {campana.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Cantidad */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Cantidad de Entregas <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="1000"
+                        value={audioFormData.cantidad}
+                        onChange={(e) =>
+                          setAudioFormData({ ...audioFormData, cantidad: Number.parseInt(e.target.value) || 1 })
+                        }
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Máximo 1000 entregas por lote</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAudioModal(false)
+                        setAudioFormData({ campana_id: "", cantidad: 1 })
+                      }}
+                      className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!audioFormData.campana_id || audioFormData.cantidad < 1}
+                      className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-lg font-medium transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                      Crear {audioFormData.cantidad} Entrega{audioFormData.cantidad > 1 ? "s" : ""} por Audio
+                    </button>
+                  </div>
+                </form>
+
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 mt-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-semibold text-emerald-800 mb-1">
+                        Información sobre Entregas por Audio
+                      </h5>
+                      <p className="text-xs text-emerald-700">
+                        Las entregas por audio se crean automáticamente con <strong>Canal 5 (Audio)</strong>. No
+                        requieren destinatarios específicos ya que son para llamadas automáticas.
                       </p>
                     </div>
                   </div>

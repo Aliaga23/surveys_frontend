@@ -284,3 +284,7 @@ export async function updateSuscriptor(data) {
   }
 }
 
+
+// Entregas por Audio (Bulk)
+export const createBulkAudioEntregas = (campanaId, cantidad) =>
+  authFetch(`/campanas/${campanaId}/entregas/bulk-audio?cantidad=${cantidad}`, { method: "POST", body: "" })

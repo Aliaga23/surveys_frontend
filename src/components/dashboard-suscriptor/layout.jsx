@@ -1,4 +1,4 @@
-// src/components/layouts/DashboardSuscriptorLayout.jsx
+
 import { useState, useEffect, useRef } from "react"
 import {
   BarChart3,
@@ -17,6 +17,7 @@ import {
   Send,
   Bot,
 } from "lucide-react"
+import { useLocation } from "react-router-dom"
 import { getCurrentUser } from "../../services/auth"
 import { useAuth } from "../../context/AuthContext"
 
@@ -33,8 +34,39 @@ import {
   SidebarTrigger,
 } from "../sidebar"
 
-const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) => {
-  /* ──────────────────────── Auth & user ─────────────────────── */
+/* ───────── Utilidades ───────── */
+const getToken = () => localStorage.getItem("token")
+
+const askBot = async (message, section) => {
+  const res = await fetch("https://surveysbackend-production.up.railway.app/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(getToken() && { Authorization: `Bearer ${getToken()}` }),
+    },
+    body: JSON.stringify({
+      message,
+      context: {
+        route: window.location.pathname,
+        section,
+      },
+    }),
+  })
+
+  if (!res.ok) {
+    const { detail } = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(detail || "Error inesperado en el chatbot")
+  }
+  return res.json() // { answer, action_log }
+}
+
+/* ──────────────────────────────── Componente ─────────────────────────────── */
+const DashboardSuscriptorLayout = ({ children }) => {
+  /* Localización para contexto y resaltado de menú */
+  const location = useLocation()
+  const currentSection = location.pathname.split("/")[2] || "dashboard"
+
+  /* Auth & usuario */
   const { logout } = useAuth()
   const [user, setUser] = useState({
     name: "Usuario Suscriptor",
@@ -44,27 +76,24 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
   })
 
   useEffect(() => {
-    const loadUser = async () => {
+    ;(async () => {
       try {
-        const userData = await getCurrentUser()
+        const u = await getCurrentUser()
         setUser((prev) => ({
           ...prev,
-          name: userData?.nombre ?? prev.name,
-          email: userData?.email ?? prev.email,
+          name: u?.nombre ?? prev.name,
+          email: u?.email ?? prev.email,
         }))
       } catch (err) {
         console.error("Error loading user:", err)
       }
-    }
-    loadUser()
+    })()
   }, [])
 
-  /* ─────────────────────── Sidebar state ────────────────────── */
+  /* Sidebar */
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const closeSidebar = () => setSidebarOpen(false)
-  const handleLogout = () => logout()
 
-  /* ─────────────────────── Chatbot state ─────────────────────── */
+  /* Chatbot */
   const [chatbotOpen, setChatbotOpen] = useState(false)
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
@@ -78,62 +107,50 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
   ])
   const bottomRef = useRef(null)
 
-  /** Envía el mensaje del usuario y genera la respuesta */
-  const sendMessage = () => {
+  /* Enviar mensaje */
+  const sendMessage = async () => {
     const text = input.trim()
     if (!text) return
-    const userMsg = {
-      id: Date.now(),
-      sender: "user",
-      text,
-      timestamp: new Date(),
-    }
-    setMessages((prev) => [...prev, userMsg])
+
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), sender: "user", text, timestamp: new Date() },
+    ])
     setInput("")
     setIsTyping(true)
 
-    setTimeout(() => {
-      const botMsg = {
-        id: Date.now() + 1,
-        sender: "bot",
-        text: getBotResponse(text),
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, botMsg])
+    try {
+      const { answer } = await askBot(text, currentSection)
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now() + 1, sender: "bot", text: answer, timestamp: new Date() },
+      ])
+    } catch (err) {
+      console.error(err)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          sender: "bot",
+          text: "❌ Hubo un problema al conectar con el asistente.",
+          timestamp: new Date(),
+        },
+      ])
+    } finally {
       setIsTyping(false)
-    }, 1200)
+    }
   }
 
-  /** Respuestas simuladas. Sustitúyelo por tu propia lógica/API */
-  const getBotResponse = (msg) => {
-    const m = msg.toLowerCase()
-    if (/plantilla|template/.test(m))
-      return "Para crear una plantilla, dirígete a “Plantillas → Nueva plantilla”. Allí eliges el tipo de pregunta y personalizas el diseño."
-    if (/campaña|campaign/.test(m))
-      return "Para lanzar una campaña necesitas al menos una plantilla y destinatarios. Ve a “Campañas → Nueva campaña” y sigue el asistente."
-    if (/destinatario|contacto/.test(m))
-      return "Añade destinatarios de forma individual o subiendo un CSV en “Destinatarios”."
-    if (/entrega|envío/.test(m))
-      return "Las entregas se generan automáticamente al activar una campaña. Revisa su estado en “Entregas”."
-    if (/respuesta|resultado/.test(m))
-      return "Analiza las respuestas y métricas en la sección “Respuestas”."
-    if (/ayuda|help/.test(m))
-      return "Puedo orientarte sobre plantillas, campañas, destinatarios, entregas o análisis de respuestas. ¿Qué deseas hacer?"
-    return "Entiendo tu consulta, ¿podrías darme más detalles?"
-  }
-
-  /* Auto-scroll al último mensaje */
+  /* Auto-scroll */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isTyping])
 
-  /* ─────────────────────── Menú lateral ─────────────────────── */
+  /* Menú lateral */
   const menu = [
     {
       title: "Panel Principal",
-      items: [
-        { title: "Dashboard", url: "/dashboard-suscriptor/dashboard", icon: BarChart3 },
-      ],
+      items: [{ title: "Dashboard", url: "/dashboard-suscriptor/dashboard", icon: BarChart3 }],
     },
     {
       title: "Gestión de Encuestas",
@@ -148,16 +165,14 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
     },
     {
       title: "Sistema",
-      items: [
-        { title: "Configuración", url: "/dashboard-suscriptor/configuracion", icon: Settings },
-      ],
+      items: [{ title: "Configuración", url: "/dashboard-suscriptor/configuracion", icon: Settings }],
     },
   ]
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* ──────────────── Sidebar ──────────────── */}
-      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar}>
+      {/* ───────── Sidebar ───────── */}
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)}>
         <SidebarHeader className="h-16 flex items-center px-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 grid place-items-center bg-blue-600 rounded-lg">
@@ -179,8 +194,8 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
                   <SidebarMenuItem key={title}>
                     <SidebarMenuButton
                       href={url}
-                      isActive={activeSection === title.toLowerCase()}
-                      onClick={closeSidebar}
+                      isActive={location.pathname.startsWith(url)}
+                      onClick={() => setSidebarOpen(false)}
                     >
                       <Icon className="h-5 w-5 mr-3" />
                       <span>{title}</span>
@@ -194,7 +209,7 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
 
         <SidebarFooter>
           <button
-            onClick={handleLogout}
+            onClick={logout}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition"
           >
             <LogOut className="w-4 h-4" />
@@ -203,13 +218,12 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
         </SidebarFooter>
       </Sidebar>
 
-      {/* ──────────────── Main ──────────────── */}
+      {/* ───────── Main ───────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-16 items-center gap-2 border-b border-gray-200 bg-white px-4 sm:px-6">
           <SidebarTrigger onClick={() => setSidebarOpen(true)} className="md:hidden" />
 
-          {/* Search */}
           <div className="flex flex-1 items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="relative hidden sm:block">
@@ -224,7 +238,6 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
               </button>
             </div>
 
-            {/* User */}
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2 cursor-pointer hover:opacity-80">
                 <div className="w-8 h-8 grid place-items-center rounded-full bg-blue-600">
@@ -238,25 +251,23 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
           </div>
         </header>
 
-        {/* Content */}
+        {/* Contenido */}
         <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
 
-        {/* ──────────────── Chatbot ──────────────── */}
+        {/* ───────── Chatbot ───────── */}
         <div className="fixed bottom-4 right-4 z-50">
-          {/* FAB */}
           {!chatbotOpen && (
             <button
               onClick={() => setChatbotOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-transform duration-300 hover:scale-110"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110"
             >
               <MessageCircle className="h-6 w-6" />
             </button>
           )}
 
-          {/* Window */}
           {chatbotOpen && (
             <div className="bg-white rounded-lg shadow-2xl w-80 h-96 flex flex-col border border-gray-200">
-              {/* Header */}
+              {/* Header chat */}
               <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Bot className="h-5 w-5" />
@@ -267,7 +278,7 @@ const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) =>
                 </button>
               </div>
 
-              {/* Messages */}
+              {/* Mensajes */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.map(({ id, sender, text }) => (
                   <div key={id} className={`flex ${sender === "user" ? "justify-end" : "justify-start"}`}>

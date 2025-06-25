@@ -16,19 +16,37 @@ import {
   Sector,
 } from "recharts"
 import DashboardSuscriptorLayout from "./layout"
-import { getDashboardData } from "../../services/api"
 
-const DashboardPage = () => {
+const Dashboard = () => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [dashboardData, setDashboardData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false)
+  const [selectedCampaignForAnalysis, setSelectedCampaignForAnalysis] = useState(null)
+  const [analysisData, setAnalysisData] = useState(null)
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false)
+
   // Función para obtener datos del API
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
-      const data = await getDashboardData()
+      const token = localStorage.getItem("token") // Asumiendo que el token se guarda en localStorage
+
+      const response = await fetch("https://surveysbackend-production.up.railway.app/analytics/dashboard", {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al obtener datos del dashboard")
+      }
+
+      const data = await response.json()
       setDashboardData(data)
       setError(null)
     } catch (err) {
@@ -37,6 +55,39 @@ const DashboardPage = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchCampaignAnalysis = async (campaignId) => {
+    try {
+      setLoadingAnalysis(true)
+      const token = localStorage.getItem("token")
+      const response = await fetch(
+        `https://surveysbackend-production.up.railway.app/dashboard/campaigns/${campaignId}/analysis`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error("Error al cargar análisis")
+      }
+
+      const data = await response.json()
+      setAnalysisData(data.analysis)
+    } catch (err) {
+      setError("Error al cargar análisis: " + err.message)
+    } finally {
+      setLoadingAnalysis(false)
+    }
+  }
+
+  const openAnalysisModal = (campaign) => {
+    setSelectedCampaignForAnalysis(campaign)
+    setShowAnalysisModal(true)
+    fetchCampaignAnalysis(campaign.id)
   }
 
   // Cargar datos al montar el componente
@@ -353,7 +404,7 @@ const DashboardPage = () => {
   // No mostrar nada si no hay datos
   if (!dashboardData) return null
 
-  const { resumen_general, campanas, } = dashboardData
+  const { resumen_general, campanas } = dashboardData
 
   return (
     <DashboardSuscriptorLayout activeSection="dashboard">
@@ -553,7 +604,9 @@ const DashboardPage = () => {
           <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Ranking de Campañas</h3>
-              <p className="text-gray-600">Análisis de rendimiento por campaña</p>
+              <p className="text-gray-600">
+                Análisis de rendimiento por campaña - Haz clic para ver análisis detallado
+              </p>
             </div>
 
             {/* Gráfica de barras para campañas */}
@@ -577,13 +630,14 @@ const DashboardPage = () => {
                 <div
                   key={campana.id}
                   className={`
-                    flex items-center justify-between p-6 border-2 rounded-xl transition-all duration-300 hover:shadow-md
+                    flex items-center justify-between p-6 border-2 rounded-xl transition-all duration-300 hover:shadow-md cursor-pointer
                     ${
                       index === 0
-                        ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
+                        ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 hover:from-yellow-100 hover:to-orange-100"
                         : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                     }
                   `}
+                  onClick={() => openAnalysisModal(campana)}
                 >
                   <div className="flex items-center gap-6">
                     <div
@@ -619,6 +673,7 @@ const DashboardPage = () => {
                     <div className="mt-2 w-24">
                       <ProgressBar value={campana.tasa_respuesta} color="green" />
                     </div>
+                    <div className="mt-2 text-xs text-blue-600 font-medium">Ver análisis →</div>
                   </div>
                 </div>
               ))}
@@ -640,9 +695,247 @@ const DashboardPage = () => {
               </p>
             </div>
           )}
+
+        {/* Modal de Análisis */}
+        {showAnalysisModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                          />
+                        </svg>
+                      </div>
+                      Análisis de Campaña
+                    </h3>
+                    <p className="text-blue-600 font-medium mt-1">{selectedCampaignForAnalysis?.nombre}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowAnalysisModal(false)
+                      setSelectedCampaignForAnalysis(null)
+                      setAnalysisData(null)
+                    }}
+                    className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-white transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 overflow-y-auto max-h-[calc(95vh-120px)]">
+                {loadingAnalysis ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="flex flex-col items-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+                      <p className="text-gray-600">Cargando análisis...</p>
+                    </div>
+                  </div>
+                ) : analysisData ? (
+                  <div className="space-y-6">
+                    {/* Resumen Ejecutivo */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-200">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <div className="w-5 h-5 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                        </div>
+                        Resumen Ejecutivo
+                      </h4>
+                      <p className="text-gray-700 leading-relaxed">{analysisData.executive_summary.texto}</p>
+                    </div>
+
+                    {/* Temas Clave */}
+                    <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-5 h-5 bg-green-100 rounded-lg flex items-center justify-center">
+                          <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                            />
+                          </svg>
+                        </div>
+                        Temas Clave Identificados
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {analysisData.temas_clave.map((tema, index) => (
+                          <div key={index} className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-medium text-gray-900">{tema.tema}</h5>
+                              <span
+                                className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                  tema.categoria === "fortaleza"
+                                    ? "bg-green-100 text-green-700"
+                                    : tema.categoria === "debilidad"
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-yellow-100 text-yellow-700"
+                                }`}
+                              >
+                                {tema.categoria}
+                              </span>
+                            </div>
+                            <div className="space-y-2">
+                              {tema.evidencia.map((evidencia, idx) => (
+                                <p key={idx} className="text-sm text-gray-600">
+                                  • {evidencia}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Acciones Prioritarias */}
+                    <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-5 h-5 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-3 h-3 text-orange-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M13 10V3L4 14h7v7l9-11h-7z"
+                            />
+                          </svg>
+                        </div>
+                        Acciones Prioritarias
+                      </h4>
+                      <div className="space-y-4">
+                        {analysisData.acciones_prioritarias.map((accion, index) => (
+                          <div key={index} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <span className="text-blue-600 font-bold text-sm">{index + 1}</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900 mb-2">{accion.accion}</p>
+                              <div className="flex gap-2">
+                                <span
+                                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                    accion.impacto === "alto"
+                                      ? "bg-red-100 text-red-700"
+                                      : accion.impacto === "medio"
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : "bg-green-100 text-green-700"
+                                  }`}
+                                >
+                                  Impacto: {accion.impacto}
+                                </span>
+                                <span
+                                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                    accion.dificultad === "alta"
+                                      ? "bg-red-100 text-red-700"
+                                      : accion.dificultad === "media"
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : "bg-green-100 text-green-700"
+                                  }`}
+                                >
+                                  Dificultad: {accion.dificultad}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Feedback por Pregunta */}
+                    <div className="bg-white p-6 rounded-2xl border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <div className="w-5 h-5 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-3 h-3 text-purple-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                        Análisis por Pregunta
+                      </h4>
+                      <div className="space-y-4">
+                        {analysisData.questions.map((question, index) => (
+                          <div key={question.question_id} className="border border-gray-200 rounded-lg p-4">
+                            <h5 className="font-medium text-gray-900 mb-3">Pregunta {index + 1}</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {question.feedback.fortalezas.length > 0 && (
+                                <div>
+                                  <h6 className="text-sm font-medium text-green-700 mb-2">Fortalezas</h6>
+                                  {question.feedback.fortalezas.map((fortaleza, idx) => (
+                                    <p key={idx} className="text-sm text-gray-600 mb-1">
+                                      • {fortaleza}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                              {question.feedback.debilidades.length > 0 && (
+                                <div>
+                                  <h6 className="text-sm font-medium text-red-700 mb-2">Debilidades</h6>
+                                  {question.feedback.debilidades.map((debilidad, idx) => (
+                                    <p key={idx} className="text-sm text-gray-600 mb-1">
+                                      • {debilidad}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                              {question.feedback.recomendaciones.length > 0 && (
+                                <div>
+                                  <h6 className="text-sm font-medium text-blue-700 mb-2">Recomendaciones</h6>
+                                  {question.feedback.recomendaciones.map((recomendacion, idx) => (
+                                    <p key={idx} className="text-sm text-gray-600 mb-1">
+                                      • {recomendacion}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No se pudo cargar el análisis</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardSuscriptorLayout>
   )
 }
 
-export default DashboardPage
+export default Dashboard

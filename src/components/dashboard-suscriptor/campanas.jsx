@@ -35,7 +35,7 @@ export default function Campanas() {
   const canales = [
     { id: 1, nombre: "Email", color: "blue", icon: "mail" },
     { id: 2, nombre: "WhatsApp", color: "green", icon: "message" },
-    { id: 3, nombre: "Llamada", color: "emerald", icon: "phone" },
+    { id: 5, nombre: "Audio", color: "emerald", icon: "phone" },
     { id: 4, nombre: "Papel", color: "purple", icon: "globe" },
 
   ]
