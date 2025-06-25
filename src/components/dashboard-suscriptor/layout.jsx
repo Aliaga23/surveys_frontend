@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { BarChart3, FileText, Target, MessageSquare, Users, Settings, LogOut, Bell, Search } from "lucide-react"
-import { logout, getCurrentUser } from "../../services/auth"
+import { getCurrentUser } from "../../services/auth"
+import { useAuth } from "../../context/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +19,7 @@ import {
 import { Link } from "react-router-dom"
 const DashboardSuscriptorLayout = ({ children, activeSection = "dashboard" }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { logout } = useAuth();
   const [user, setUser] = useState({
     name: "Usuario Suscriptor",
     email: "usuario@empresa.com",

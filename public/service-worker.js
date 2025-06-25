@@ -65,28 +65,38 @@ self.addEventListener('fetch', event => {
     );
   } else {
     // Para archivos estáticos (imágenes, css, js)
-    event.respondWith(
-      caches.match(event.request).then(cachedResponse => {
-        return (
-          cachedResponse ||
-          fetch(event.request)
-            .then(response => {
-              if (response.ok) {
-                return caches.open(DYNAMIC_CACHE).then(cache => {
-                  cache.put(event.request.clone(), response.clone());
-                  return response;
-                });
-              }
-              return response;
-            })
-            .catch(() =>
-              new Response('Offline', {
-                status: 503,
-                statusText: 'Offline',
-                headers: { 'Content-Type': 'text/plain' }
-              })
-            )
-        );
+      event.respondWith(
+      caches.open(DYNAMIC_CACHE).then(async cache => {
+        const cachedResponse = await cache.match(event.request);
+        const networkFetch = fetch(event.request)
+          .then(networkResponse => {
+            if (networkResponse.ok) {
+                  cache.put(event.request, networkResponse.clone());
+
+                  //  Notificar al frontend que algo fue actualizado en caché
+                  self.clients.matchAll().then(clients => {
+                    clients.forEach(client => {
+                      client.postMessage({
+                        type: 'CACHE_UPDATED',
+                        url: event.request.url
+                      });
+                    });
+                  });
+                }
+
+            return networkResponse;
+          })
+          .catch(() => {
+            // Si falla la red, devuelve el caché si existe
+            return cachedResponse || new Response('Offline', {
+              status: 503,
+              statusText: 'Offline',
+              headers: { 'Content-Type': 'text/plain' }
+            });
+          });
+
+        // Devuelve cache inmediatamente si existe, pero actualiza en segundo plano
+        return cachedResponse || networkFetch;
       })
     );
   }
