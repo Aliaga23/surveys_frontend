@@ -146,3 +146,20 @@ export async function updateAdmin(data) {
     throw error
   }
 }
+export const listarEstadosDocumento = () =>
+  authFetch("/catalogos/estados-documento")
+
+export const crearEstadoDocumento = (nombre) =>
+  authFetch("/catalogos/estados-documento", {
+    method: "POST",
+    body  : JSON.stringify({ nombre }),
+  })
+
+export const actualizarEstadoDocumento = (id, nombre) =>
+  authFetch(`/catalogos/estados-documento/${id}`, {
+    method: "PUT",
+    body  : JSON.stringify({ nombre }),
+  })
+
+export const eliminarEstadoDocumento = (id) =>
+  authFetch(`/catalogos/estados-documento/${id}`, { method: "DELETE" })

@@ -84,12 +84,15 @@ const PlanesPage = () => {
 
   return (
     <DashboardLayout activeSection="planes">
-      <div className="p-6">
+      <div className="min-h-full p-4 sm:p-6 bg-gradient-to-br
+                from-slate-50 via-blue-50 to-indigo-50">
         <div className="mb-6 sm:mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold">Planes de Suscripción</h1>
-            <p className="text-gray-600 text-sm">Gestiona los planes y sus precios</p>
-          </div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
+                Gestión de Planes
+              </h1>
+              <p className="text-slate-600 text-lg">Gestiona los planes y sus precios</p>
+            </div>
           <button
             onClick={() => setShowModal(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
@@ -124,9 +127,9 @@ const PlanesPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 ">
           {planes.map((plan) => (
-            <div key={plan.id} className="bg-white rounded-xl shadow-sm border p-4 relative">
+            <div key={plan.id} className="bg-white rounded-xl shadow-sm border p-4 relative hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
               <div className="mb-3">
                 <h3 className="text-lg font-semibold text-gray-900">{plan.nombre}</h3>
                 <p className="text-sm text-gray-600 line-clamp-2">{plan.descripcion}</p>

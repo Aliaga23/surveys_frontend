@@ -5,7 +5,6 @@ import {
   Users,
   Radio,
   FileText,
-  Settings,
   LogOut,
   Search,
   MessageSquare,
@@ -130,17 +129,6 @@ const DashboardLayout = ({ children, activeSection = "roles" }) => {
           url: "/dashboard/metodos-pago",
           icon: DollarSign,
           isActive: activeSection === "metodos-pago",
-        },
-      ],
-    },
-    {
-      title: "Sistema",
-      items: [
-        {
-          title: "Configuración",
-          url: "/dashboard/configuracion",
-          icon: Settings,
-          isActive: activeSection === "configuracion",
         },
       ],
     },

@@ -1,122 +1,89 @@
-
-
 import { useEffect, useState } from "react"
-import { Plus, Edit, Trash2, Radio, Mail, MessageSquare, Smartphone, Globe, MoreHorizontal } from "lucide-react"
+import { Plus, Edit, Trash2, MoreHorizontal, Radio } from "lucide-react"
 import DashboardLayout from "../dashboard-layout"
-import { actualizarCanal, crearCanal, eliminarCanal, listarCanales } from "../../services/api-admin"
+import {
+  listarCanales,
+  crearCanal,
+  actualizarCanal,
+  eliminarCanal,
+} from "../../services/api-admin"
 
 const CanalesPage = () => {
+  /* ---------------- state ---------------- */
   const [canales, setCanales] = useState([])
-
-  useEffect(() => {
-    async function fetchCanales() {
-      try {
-        const data = await listarCanales()
-
-        const dataConValoresPorDefecto = data.map((canal) => ({
-          ...canal,
-          tipo: canal.tipo || "email",
-          descripcion: canal.descripcion || "Sin tipo",
-          configuracion: canal.configuracion || {},
-          estado: canal.estado || "activo",
-          encuestasEnviadas: canal.encuestasEnviadas ?? 0,
-          tasaRespuesta: canal.tasaRespuesta ?? 0,
-          fechaCreacion: canal.fechaCreacion || new Date().toISOString(),
-        }))
-
-        setCanales(dataConValoresPorDefecto)
-      } catch (error) {
-        console.error("Error al cargar canales:", error)
-      }
-    }
-
-    fetchCanales()
-  }, [])
   const [showModal, setShowModal] = useState(false)
-  const [editingCanal, setEditingCanal] = useState(null)
+  const [editingCanal, setEditing] = useState(null)
+  const [nombre, setNombre] = useState("")
 
-  const getIconByType = (tipo) => {
-    switch (tipo) {
-      case "email":
-        return Mail
-      case "whatsapp":
-        return MessageSquare
-      case "sms":
-        return Smartphone
-      case "web":
-        return Globe
-      default:
-        return Radio
-    }
+  /* ---------------- helpers -------------- */
+  const resetForm = () => {
+    setNombre("")
+    setEditing(null)
   }
 
-  const getColorByType = (tipo) => {
-    switch (tipo) {
-      case "email":
-        return "bg-blue-100 text-blue-600"
-      case "whatsapp":
-        return "bg-green-100 text-green-600"
-      case "sms":
-        return "bg-purple-100 text-purple-600"
-      case "web":
-        return "bg-orange-100 text-orange-600"
-      default:
-        return "bg-gray-100 text-gray-600"
-    }
+  const refresh = async () => {
+    const data = await listarCanales()
+    setCanales(data)             
   }
 
-  const handleEdit = (canal) => {
-    setEditingCanal(canal)
-    setShowModal(true)
+  /* --------------- init ------------------ */
+  useEffect(() => { refresh() }, [])
+
+  /* --------------- CRUD ------------------ */
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      if (editingCanal) {
+        const actualizado = await actualizarCanal(editingCanal.id, { nombre })
+        setCanales(prev =>
+          prev.map(c => (c.id === actualizado.id ? actualizado : c))
+        )
+      } else {
+        const creado = await crearCanal({ nombre })
+        setCanales(prev => [...prev, creado])
+      }
+
+      // await refresh()   // ← descomenta si quieres validar con el servidor
+      setShowModal(false)
+      resetForm()
+    } catch (err) {
+      console.error("Error guardando canal:", err)
+    }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que quieres eliminar este canal?")) {
-      try {
-        await eliminarCanal(id)
+    if (!window.confirm("¿Eliminar este canal?")) return
 
-        const actualizados = await listarCanales()
-        const normalizados = actualizados.map((c) => ({
-          ...c,
-          tipo: c.tipo || "email",
-          descripcion: c.descripcion || "Sin tipo",
-          configuracion: c.configuracion || {},
-          estado: c.estado || "activo",
-          encuestasEnviadas: c.encuestasEnviadas ?? 0,
-          tasaRespuesta: c.tasaRespuesta ?? 0,
-          fechaCreacion: c.fechaCreacion || new Date().toISOString(),
-        }))
-
-        setCanales(normalizados)
-      } catch (error) {
-        console.error("Error al eliminar canal:", error)
-        alert("No se pudo eliminar el canal.")
-      }
+    try {
+      await eliminarCanal(id)
+      setCanales(prev => prev.filter(c => c.id !== id))
+    } catch (err) {
+      console.error("Error eliminando canal:", err)
     }
   }
 
+  /* ---------------- UI ------------------- */
   return (
     <DashboardLayout activeSection="canales">
-      <div className="p-6">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gestión de Canales</h1>
-              <p className="text-gray-600 mt-1 text-sm sm:text-base">
-                Configura y administra los canales de distribución
-              </p>
-            </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors w-full sm:w-auto"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Nuevo Canal</span>
-            </button>
-          </div>
-        </div>
+      <div className="min-h-full p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
 
+        {/* -------- encabezado -------- */}
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
+              Canales
+            </h1>
+            <p className="text-slate-600 text-lg">Configura y administra tus canales de distribución</p>
+          </div>
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+            <Plus className="h-4 w-4" />
+            Nuevo Canal
+          </button>
+        </div>
         {        /* Stats Cardssss */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -130,182 +97,85 @@ const CanalesPage = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <MessageSquare className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Encuestas Enviadas</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {canales.reduce((sum, canal) => sum + canal.encuestasEnviadas, 0).toLocaleString()}
-                </p>
-              </div>
-            </div>
+        </div>
+
+        {/* -------- tabla simple -------- */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-slate-300/25 transition-all duration-300 hover:-translate-y-1">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">Lista de Canales</h3>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Smartphone className="h-6 w-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tasa Respuesta Promedio</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {(canales.reduce((sum, canal) => sum + canal.tasaRespuesta, 0) / canales.length).toFixed(1)}%
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Globe className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Canales Activos</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {canales.filter((c) => c.estado === "activo").length}
-                </p>
-              </div>
-            </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                    Nombre
+                  </th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="bg-white divide-y divide-gray-200">
+                {canales.map(canal => (
+                  <tr key={canal.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4">{canal.nombre}</td>
+                    <td className="px-4 py-4 text-right">
+                      <div className="inline-flex gap-2">
+                        <button
+                          onClick={() => { setEditing(canal); setNombre(canal.nombre); setShowModal(true) }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(canal.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:bg-gray-50 rounded-lg">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-          {canales.map((canal) => {
-            const IconComponent = getIconByType(canal.tipo)
-            return (
-              <div key={canal.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className={`p-2 rounded-lg ${getColorByType(canal.tipo)} flex-shrink-0`}>
-                      <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{canal.nombre}</h3>
-                      <p className="text-xs sm:text-sm text-gray-500 line-clamp-2">{canal.descripcion}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
-                    <button onClick={() => handleEdit(canal)} className="p-1 text-gray-400 hover:text-blue-600">
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => handleDelete(canal.id)} className="p-1 text-gray-400 hover:text-red-600">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                    <button className="p-1 text-gray-400 hover:text-gray-600">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Estado</span>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {canal.estado}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Encuestas Enviadas</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {canal.encuestasEnviadas.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Tasa de Respuesta</span>
-                    <span className="text-sm font-medium text-gray-900">{canal.tasaRespuesta}%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Fecha Creación</span>
-                    <span className="text-sm text-gray-500">{new Date(canal.fechaCreacion).toLocaleDateString()}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <button className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium">
-                    Ver Configuración
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Modal */}
+        {/* -------- modal -------- */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg font-semibold mb-4">
                 {editingCanal ? "Editar Canal" : "Nuevo Canal"}
               </h3>
-              <form 
-                className="space-y-4"
-                onSubmit={async (e) => {
-                  e.preventDefault()
-                  const form = e.target
-                  const nombre = form[0].value
-                  const tipo = form[1].value
-                  const descripcion = form[2].value
 
-                  const nuevoCanal = {
-                    nombre,
-                    tipo,
-                    descripcion,
-                    activo: true,
-                  }
-
-                  try {
-                    if (editingCanal) {
-                      await actualizarCanal(editingCanal.id, nuevoCanal)
-                    } else {
-                      await crearCanal(nuevoCanal)
-                    }
-
-                    const actualizados = await listarCanales()
-                    const normalizados = actualizados.map((c) => ({
-                      ...c,
-                      tipo: c.tipo || "email",
-                      descripcion: c.descripcion || "Sin tipo",
-                      configuracion: c.configuracion || {},
-                      estado: c.estado || "activo",
-                      encuestasEnviadas: c.encuestasEnviadas ?? 0,
-                      tasaRespuesta: c.tasaRespuesta ?? 0,
-                      fechaCreacion: c.fechaCreacion || new Date().toISOString(),
-                    }))
-
-                    setCanales(normalizados)
-                    setShowModal(false)
-                    setEditingCanal(null)
-                  } catch (error) {
-                    console.error("Error al guardar canal:", error)
-                    alert("No se pudo guardar el canal.")
-                  }
-                }}
-              >
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Canal</label>
+                  <label className="block text-sm font-medium mb-1">Nombre</label>
                   <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Ej: Email Marketing"
-                    defaultValue={editingCanal?.nombre || ""}
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Ej: Email marketing"
                   />
                 </div>
-                
-                <div className="flex justify-end space-x-3 pt-4">
+
+                <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowModal(false)
-                      setEditingCanal(null)
-                    }}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                  >
+                    onClick={() => { setShowModal(false); resetForm() }}
+                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
                     Cancelar
                   </button>
-                  <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     {editingCanal ? "Actualizar" : "Crear"}
                   </button>
                 </div>
@@ -313,6 +183,7 @@ const CanalesPage = () => {
             </div>
           </div>
         )}
+
       </div>
     </DashboardLayout>
   )
