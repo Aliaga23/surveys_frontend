@@ -1,71 +1,121 @@
-# Getting Started with Create React App
+# Surveys Frontend 🌐
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+*Front‑end web de **SurveySaaS** construido con **React 19** + **Create React App 5**, **Tailwind CSS** y **React Router 7**. Incluye un constructor visual de encuestas, dashboards en tiempo real y un modo **PWA offline‑first** que sincroniza respuestas en segundo plano usando **IndexedDB** + **Background Sync**.*
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Tabla de contenidos
 
-### `npm start`
+1. [Características](#características)
+2. [Demo rápido](#demo-rápido)
+3. [Arquitectura y stack](#arquitectura-y-stack)
+4. [Estructura del proyecto](#estructura-del-proyecto)
+5. [Primeros pasos](#primeros-pasos)
+6. [Scripts npm](#scripts-npm)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## Características
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* **Create React App** 5 con React 19 ⚛︎.
+* **Tailwind CSS 3** + **shadcn/ui** para un *design system* limpio.
+* **React Router DOM 7** con `Routes` anidadas y *lazy loading*.
+* **Role‑based dashboards**: `admin`, `suscriptor`, `operador`.
+* **Constructor visual** drag‑and‑drop para plantillas de encuestas (exporta JSON compatible con el runtime Flutter).
+* **Analytics dashboard** usando **Recharts** + resúmenes GPT‑4.
+* **PWA**: *service worker* registrado en `src/serviceWorkerRegistration.js`.
 
-### `npm run build`
+  * **IndexedDB** cola peticiones (`offlineSync.js`).
+  * **Background Sync** (o fallback on‑line) para sincronizar al reconectar.
+* **auth** vía JWT (cabecera `Authorization: Bearer` guardada en *`localStorage`*).
+* **100 % React** – sin Next.js ni Vite – usando los *scripts* de CRA (`react-scripts`).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Demo rápido
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# Instala dependencias y levanta
+npm i && npm start
+# La app quedará en http://localhost:3000
+```
 
-### `npm run eject`
+> **Backend**: apunta a tu instancia de [`surveys_backend`](https://github.com/Aliaga23/surveys_backend) o ajusta la variable de entorno.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Arquitectura y stack
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+| Capa          | Paquetes / Tecnologías                       |
+| ------------- | -------------------------------------------- |
+| Framework     | **React 19** (CRA 5)                         |
+| Ruteo         | `react-router-dom@7`                         |
+| UI / Estilos  | Tailwind CSS, shadcn/ui, lucide‑react        |
+| Estado global | Context API + hooks personalizados           |
+| Datos / HTTP  | `fetch` wrappers (`lib/api.js`)              |
+| Charts        | Recharts 3                                   |
+| Offline       | Service Worker + IndexedDB (Background Sync) |
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## Estructura del proyecto
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```text
+surveys_frontend/
+├── public/                  # index.html, manifest, íconos PWA
+├── src/
+│   ├── assets/              # Logos e imágenes
+│   ├── components/          # UI genérica (Button, Card, Chart, …)
+│   ├── pages/               # Páginas de ruta (LandingPage, LoginPage,…)
+│   ├── context/             # AuthContext, etc.
+│   ├── services/            # api.js, offlineSync.js, …
+│   ├── components/dashboard # Admin dashboard widgets
+│   ├── components/dashboard-suscriptor  # UI suscriptor
+│   ├── components/dashboard-operador    # UI operador
+│   ├── router/              # Definición central de rutas (PrivateRoute,
+│   │                         # Route guards por rol)
+│   ├── index.js             # Punto de entrada (registra SW + offline listeners)
+│   └── App.jsx              # Árbol de rutas principal
+├── tailwind.config.js
+├── postcss.config.js
+├── package.json
+└── README.md
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## Primeros pasos
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 1. Requisitos
 
-### Analyzing the Bundle Size
+* **Node.js ≥ 20**
+* **npm 8** (o `pnpm` / `yarn`)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### 2. Clona e instala
 
-### Making a Progressive Web App
+```bash
+git clone https://github.com/Aliaga23/surveys_frontend.git
+cd surveys_frontend
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 3. Ejecuta
 
-### Advanced Configuration
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-### Deployment
+## Scripts npm
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+| Comando | Acción                                         |
+| ------- | ---------------------------------------------- |
+| `start` | Levanta dev‑server con HMR                     |
+| `build` | Compila producción al directorio `build/`      |
+| `test`  | Ejecuta tests con React Testing Library + Jest |
+| `eject` | Copia config de CRA (irreversible)             |
 
-### `npm run build` fails to minify
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# surveys_frontend
+
